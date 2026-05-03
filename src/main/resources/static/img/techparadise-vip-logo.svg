@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="TechParadise VIP Logo">
+  <defs>
+    <linearGradient id="vipBg" x1="10" y1="10" x2="86" y2="86" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff6a00"/>
+      <stop offset="0.55" stop-color="#ff3b30"/>
+      <stop offset="1" stop-color="#ff9f1c"/>
+    </linearGradient>
+    <linearGradient id="vipShine" x1="16" y1="14" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.86"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="vipGold" x1="30" y1="18" x2="64" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff4bf"/>
+      <stop offset="0.6" stop-color="#ffd166"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="vipGlow" x="-12" y="-12" width="120" height="120" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#ff6a00" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#vipGlow)">
+    <rect x="4" y="4" width="88" height="88" rx="24" fill="url(#vipBg)"/>
+    <rect x="8" y="8" width="80" height="80" rx="20" fill="url(#vipShine)" fill-opacity="0.35"/>
+
+    <path d="M24 32 L33 22 L42 32 L48 24 L54 32 L63 22 L72 32 L70 40 H26 Z" fill="url(#vipGold)"/>
+
+    <path d="M26 54 V46 H60 V54 H48 V68 H40 V54 Z" fill="#ffffff"/>
+    <path d="M56 46 H70 V54 H66 V68 H58 V54 H56 Z" fill="#ffffff"/>
+
+    <path d="M20 61 C24 60 27 57 29 53" stroke="#ffffff" stroke-opacity="0.86" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="18" cy="62" r="2.2" fill="#ffffff"/>
+    <path d="M76 61 C72 60 69 57 67 53" stroke="#ffffff" stroke-opacity="0.86" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="78" cy="62" r="2.2" fill="#ffffff"/>
+  </g>
+</svg>

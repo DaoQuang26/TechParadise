@@ -1,0 +1,45 @@
+@startuml UC15_analysis
+title UC15 - Quan ly khuyen mai (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminPromotionPage <<boundary>> {
+  +code
+  +discountPercent
+  +startDate
+  +endDate
+  +active
+  +clickCreatePromotion()
+  +clickUpdatePromotion()
+  +clickDeletePromotion()
+}
+class PromotionController <<control>> {
+  +findAll()
+  +create(promotion)
+  +update(id,promotion)
+  +delete(id)
+}
+class PromotionService <<control>> {
+  +findAll()
+  +create(promotion)
+  +update(id,promotion)
+  +delete(id)
+  +findValidPromotionOrThrow(code)
+}
+class AdminAuditLogService <<control>>
+class PromotionRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Promotion <<entity>>
+class AdminAuditLog <<entity>>
+class "promotions (table)" as PromotionsTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminPromotionPage --> PromotionController
+PromotionController --> PromotionService
+PromotionController --> AdminAuditLogService
+PromotionService --> PromotionRepository
+AdminAuditLogService --> AdminAuditLogRepository
+PromotionRepository --> Promotion
+AdminAuditLogRepository --> AdminAuditLog
+Promotion .. PromotionsTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml

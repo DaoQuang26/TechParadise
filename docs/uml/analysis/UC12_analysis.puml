@@ -1,0 +1,57 @@
+@startuml UC12_analysis
+title UC12 - Quan ly san pham (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminProductPage <<boundary>> {
+  +productForm
+  +variantGrid
+  +clickCreateProduct()
+  +clickUpdateProduct()
+  +clickDeleteProduct()
+  +clickSaveVariants()
+}
+class AdminProductController <<control>> {
+  +getPagedProducts(...)
+  +createProduct(product)
+  +updateProduct(id,product)
+  +deleteProduct(id)
+  +replaceVariants(id,requests)
+}
+class ProductService <<control>>
+class ProductVariantService <<control>>
+class AdminAuditLogService <<control>>
+class ProductRepository <<control>>
+class CategoryRepository <<control>>
+class ProductVariantRepository <<control>>
+class OrderItemRepository <<control>>
+class CartItemRepository <<control>>
+class ProductReviewRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Product <<entity>>
+class ProductVariant <<entity>>
+class Category <<entity>>
+class AdminAuditLog <<entity>>
+class "products (table)" as ProductsTable <<entity>>
+class "product_variants (table)" as VariantsTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminProductPage --> AdminProductController
+AdminProductController --> ProductService
+AdminProductController --> ProductVariantService
+AdminProductController --> AdminAuditLogService
+ProductService --> ProductRepository
+ProductService --> CategoryRepository
+ProductService --> OrderItemRepository
+ProductService --> CartItemRepository
+ProductService --> ProductVariantRepository
+ProductService --> ProductReviewRepository
+ProductVariantService --> ProductVariantRepository
+AdminAuditLogService --> AdminAuditLogRepository
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+CategoryRepository --> Category
+AdminAuditLogRepository --> AdminAuditLog
+Product .. ProductsTable : ORM map
+ProductVariant .. VariantsTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml

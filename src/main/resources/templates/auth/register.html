@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - TechParadise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}" href="/css/main.css">
+</head>
+<body class="auth-page auth-register-page">
+<!-- Auth layout: nền + thẻ đăng ký (trái: branding, phải: form) -->
+<div class="auth-layout">
+    <div class="auth-grid">
+        <div class="auth-card">
+            <!-- Khối visual/branding (nội dung marketing) -->
+            <div class="auth-visual">
+                <div class="auth-brand">
+                    <span class="logo-mark">TP</span>
+                    <div>
+                        <div class="auth-brand-name">TechParadise</div>
+                        <div class="auth-brand-sub">Mua đồ công nghệ, nhanh gọn hơn mỗi ngày</div>
+                    </div>
+                </div>
+                <div class="auth-eyebrow">Chào thành viên mới</div>
+
+                <h1>Tạo tài khoản trong 1 phút</h1>
+                <p>Chỉ cần vài thông tin cơ bản là bạn có thể bắt đầu mua sắm, lưu giỏ hàng và theo dõi đơn tiện hơn.</p>
+
+                <div class="auth-points" aria-label="Lợi ích">
+                    <div class="auth-point"><span class="auth-dot"></span><span>Lưu lại sản phẩm đang xem để quay lại sau</span></div>
+                    <div class="auth-point"><span class="auth-dot"></span><span>Đặt hàng nhanh hơn ở những lần mua tiếp theo</span></div>
+                    <div class="auth-point"><span class="auth-dot"></span><span>Nhận ưu đãi đúng lúc, không bỏ lỡ deal ngon</span></div>
+                </div>
+
+                <div class="auth-insight-grid" aria-label="Nền tảng TechParadise">
+                    <div class="auth-insight-item">
+                        <strong>15K+</strong>
+                        <span>Khách hàng đã tin dùng</span>
+                    </div>
+                    <div class="auth-insight-item">
+                        <strong>30+</strong>
+                        <span>Thương hiệu công nghệ</span>
+                    </div>
+                    <div class="auth-insight-item">
+                        <strong>24/7</strong>
+                        <span>Tư vấn online mỗi ngày</span>
+                    </div>
+                </div>
+
+                <a class="auth-home" href="/">← Về trang chủ</a>
+            </div>
+
+            <!-- Form đăng ký: gọi API /api/auth/register (xem js/auth.js) -->
+            <form id="register-form" class="auth-form auth-form-register" onsubmit="techstoreAuth.register(event)">
+                <div class="auth-top">
+                    <h2>Đăng ký</h2>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="username">Tên đăng nhập</label>
+                    <div class="input-with-icon">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="8" r="4"></circle>
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                            </svg>
+                        </span>
+                        <input id="username" class="input" required minlength="3" autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="email">Email</label>
+                    <div class="input-with-icon">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M4 6h16v12H4z"></path>
+                                <path d="m4 7 8 6 8-6"></path>
+                            </svg>
+                        </span>
+                        <input id="email" class="input" type="email" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="fullName">Họ và tên</label>
+                    <div class="input-with-icon">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="8" r="4"></circle>
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                            </svg>
+                        </span>
+                        <input id="fullName" class="input" required minlength="2" maxlength="120" autocomplete="name">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="password">Mật khẩu</label>
+                    <div class="password-wrap">
+                        <div class="input-with-icon" style="flex: 1;">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                    <path d="M6 11h12v10H6z"></path>
+                                </svg>
+                            </span>
+                            <input id="password" class="input" type="password" required minlength="6" autocomplete="new-password">
+                        </div>
+                        <!-- Nút đổi type=password<->text để hiện/ẩn mật khẩu -->
+                        <button class="btn btn-outline btn-icon" type="button" onclick="techstoreAuth.togglePassword('password')" aria-label="Hiển thị mật khẩu">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="confirmPassword">Xác nhận mật khẩu</label>
+                    <div class="password-wrap">
+                        <div class="input-with-icon" style="flex: 1;">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                    <path d="M6 11h12v10H6z"></path>
+                                </svg>
+                            </span>
+                            <input id="confirmPassword" class="input" type="password" required minlength="6" autocomplete="new-password">
+                        </div>
+                        <button class="btn btn-outline btn-icon" type="button" onclick="techstoreAuth.togglePassword('confirmPassword')" aria-label="Hiển thị xác nhận mật khẩu">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="phone">Số điện thoại</label>
+                    <div class="input-with-icon">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M22 16.9v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.06 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.86.3 1.7.54 2.5a2 2 0 0 1-.45 2.11L8 9.9a16 16 0 0 0 6.1 6.1l1.57-1.2a2 2 0 0 1 2.11-.45c.8.24 1.64.42 2.5.54A2 2 0 0 1 22 16.9Z"></path>
+                            </svg>
+                        </span>
+                        <input id="phone" class="input" required minlength="8" maxlength="30" autocomplete="tel">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="address">Địa chỉ</label>
+                    <div class="input-with-icon">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"></path>
+                                <circle cx="12" cy="10" r="2.5"></circle>
+                            </svg>
+                        </span>
+                        <input id="address" class="input" autocomplete="street-address" placeholder="Ví dụ: 123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh" required>
+                    </div>
+                </div>
+
+                <!-- Lỗi/thành công đăng ký sẽ được JS gán vào đây -->
+                <div id="error" class="error-msg"></div>
+                <div id="success" class="success-msg"></div>
+
+                <button class="btn btn-solid btn-block" type="submit">Tạo tài khoản</button>
+
+                <div class="divider"><span>đã có tài khoản?</span></div>
+
+                <div class="auth-footer auth-footer-between">
+                    <a class="btn btn-outline" href="/login">Đăng nhập</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script th:src="@{/js/auth.js(v='20260419c')}" src="/js/auth.js?v=20260419c"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+@startuml UC04_analysis
+title UC04 - Xem san pham theo danh muc - Analysis Class
+skinparam classAttributeIconSize 0
+
+class CategoryProductPage <<boundary>> {
+  +selectedCategoryId
+  +loadCategories()
+  +filterProductsByCategory()
+}
+class CategoryController <<control>> {
+  +getAll()
+}
+class CategoryService <<control>> {
+  +findAll()
+}
+class ProductController <<control>> {
+  +getAllProducts(keyword,categoryId)
+}
+class ProductService <<control>> {
+  +getPublicProducts(keyword,categoryId)
+}
+class CategoryRepository <<control>> {
+  +findAll()
+}
+class ProductRepository <<control>> {
+  +findByCategoryId()
+}
+class Category <<entity>> {
+  +id
+  +name
+  +description
+}
+class Product <<entity>> {
+  +id
+  +name
+  +price
+  +imageUrl
+  +category
+}
+class "categories (table)" as CategoriesTable <<entity>>
+class "products (table)" as ProductsTable <<entity>>
+
+CategoryProductPage --> CategoryController
+CategoryProductPage --> ProductController
+CategoryController --> CategoryService
+CategoryService --> CategoryRepository
+ProductController --> ProductService
+ProductService --> ProductRepository
+CategoryRepository --> Category
+ProductRepository --> Product
+Category .. CategoriesTable : ORM map
+Product .. ProductsTable : ORM map
+@enduml

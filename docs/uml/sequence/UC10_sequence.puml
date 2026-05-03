@@ -1,0 +1,36 @@
+@startuml UC10_sequence
+title UC10 - Danh gia san pham da mua
+actor "Khach hang" as Customer
+boundary "ReviewDialog" as ReviewDialog
+control "CustomerProductReviewController" as ReviewController
+control "ProductReviewService" as ReviewService
+database "UserRepository / users" as UserRepo
+database "ProductRepository / products" as ProductRepo
+database "OrderItemRepository /\norder_items+orders" as OrderItemRepo
+database "ProductReviewRepository /\nproduct_reviews" as ReviewRepo
+
+Customer -> ReviewDialog : Chon san pham da mua
+Customer -> ReviewDialog : Nhap rating (1..5) + content
+Customer -> ReviewDialog : Bam nut Gui danh gia
+ReviewDialog -> ReviewController : POST /api/customer/products/{productId}/reviews
+ReviewController -> ReviewService : upsertMyReview(productId,username,request)
+ReviewService -> UserRepo : findByUsername(username)
+ReviewService -> ProductRepo : findById(productId)
+ReviewService -> OrderItemRepo : existsByUserAndProductAndOrderStatus(\nDELIVERED)
+alt Da mua va da giao hang
+  ReviewService -> ReviewRepo : findByProductIdAndUserId()
+  ReviewService -> ReviewRepo : save(create/update review)
+  ReviewRepo --> ReviewService : ProductReview
+  ReviewService --> ReviewController : ProductReviewResponse
+  ReviewController --> ReviewDialog : 201 + review data
+  ReviewDialog --> Customer : Hien thi danh gia moi
+else Chua mua/chua giao or rating noi dung khong hop le
+  ReviewService --> ReviewController : IllegalArgumentException
+  ReviewController --> ReviewDialog : 400 + thong bao loi
+  ReviewDialog --> Customer : Hien thi loi
+else Loi CSDL
+  ReviewRepo --> ReviewService : DataAccessException
+  ReviewController --> ReviewDialog : 500 Loi he thong
+  ReviewDialog --> Customer : Hien thi Loi he thong
+end
+@enduml

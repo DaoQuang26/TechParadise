@@ -1,0 +1,35 @@
+@startuml UC05_analysis
+title UC05 - Tim kiem san pham - Analysis Class
+skinparam classAttributeIconSize 0
+
+class SearchBar <<boundary>> {
+  +keyword
+  +clickSearch()
+}
+class ProductController <<control>> {
+  +getAllProducts(keyword,categoryId)
+  +getAllProductsPaged(keyword,categoryId,page,size)
+}
+class ProductService <<control>> {
+  +getPublicProducts(keyword,categoryId)
+  +getPublicProductsPaged(keyword,categoryId,page,size)
+}
+class ProductRepository <<control>> {
+  +findByNameContainingIgnoreCase()
+  +searchPublicProducts()
+}
+class Product <<entity>> {
+  +id
+  +name
+  +price
+  +discountPercent
+  +stock
+}
+class "products (table)" as ProductsTable <<entity>>
+
+SearchBar --> ProductController
+ProductController --> ProductService
+ProductService --> ProductRepository
+ProductRepository --> Product
+Product .. ProductsTable : ORM map
+@enduml

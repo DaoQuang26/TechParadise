@@ -1,0 +1,38 @@
+@startuml UC04_sequence
+title UC04 - Xem san pham theo danh muc
+actor "Khach hang" as Customer
+boundary "CategoryProductPage" as CategoryProductPage
+control "CategoryController" as CategoryController
+control "CategoryService" as CategoryService
+control "ProductController" as ProductController
+control "ProductService" as ProductService
+database "CategoryRepository / categories" as CategoryRepo
+database "ProductRepository / products" as ProductRepo
+
+Customer -> CategoryProductPage : Bam menu San pham
+CategoryProductPage -> CategoryController : GET /api/public/categories
+CategoryController -> CategoryService : findAll()
+CategoryService -> CategoryRepo : findAll()
+CategoryRepo --> CategoryService : List<Category>
+CategoryService --> CategoryController : Danh sach danh muc
+CategoryController --> CategoryProductPage : Hien thi danh muc
+
+Customer -> CategoryProductPage : Chon 1 danh muc
+CategoryProductPage -> ProductController : GET /api/public/products?categoryId=...
+ProductController -> ProductService : getPublicProducts(keyword=null, categoryId)
+ProductService -> ProductRepo : findByCategoryId(categoryId)
+ProductRepo --> ProductService : List<Product>
+alt Co san pham
+  ProductService --> ProductController : Danh sach san pham
+  ProductController --> CategoryProductPage : Render product cards
+  CategoryProductPage --> Customer : Hien thi ket qua
+else Khong co san pham phu hop
+  ProductService --> ProductController : []
+  ProductController --> CategoryProductPage : Danh sach rong
+  CategoryProductPage --> Customer : "Khong co san pham"
+else Loi CSDL
+  ProductRepo --> ProductService : DataAccessException
+  ProductController --> CategoryProductPage : 500 Loi he thong
+  CategoryProductPage --> Customer : Hien thi Loi he thong
+end
+@enduml

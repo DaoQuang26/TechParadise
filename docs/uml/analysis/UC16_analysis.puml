@@ -1,0 +1,39 @@
+@startuml UC16_analysis
+title UC16 - Quan ly banner (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminBannerPage <<boundary>> {
+  +imageUrl
+  +targetUrl
+  +altText
+  +clickCreateBanner()
+  +clickDeleteBanner()
+}
+class HomeBannerController <<control>> {
+  +getAdminHomeBanners()
+  +createHomeBanner(request)
+  +deleteHomeBanner(id)
+}
+class HomeBannerService <<control>> {
+  +findAdminHomeBanners()
+  +create(request)
+  +delete(id)
+}
+class AdminAuditLogService <<control>>
+class HomeBannerRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class HomeBanner <<entity>>
+class AdminAuditLog <<entity>>
+class "home_banners (table)" as BannerTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminBannerPage --> HomeBannerController
+HomeBannerController --> HomeBannerService
+HomeBannerController --> AdminAuditLogService
+HomeBannerService --> HomeBannerRepository
+AdminAuditLogService --> AdminAuditLogRepository
+HomeBannerRepository --> HomeBanner
+AdminAuditLogRepository --> AdminAuditLog
+HomeBanner .. BannerTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml

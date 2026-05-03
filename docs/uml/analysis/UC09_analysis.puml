@@ -1,0 +1,40 @@
+@startuml UC09_analysis
+title UC09 - Quan ly thong tin ca nhan - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ProfilePage <<boundary>> {
+  +fullName
+  +email
+  +phone
+  +address
+  +currentPassword
+  +newPassword
+  +clickSaveProfile()
+}
+class CustomerProfileController <<control>> {
+  +me()
+  +update(request)
+}
+class ProfileService <<control>> {
+  +getProfile(username)
+  +updateProfile(username,request)
+}
+class PasswordEncoder <<control>> {
+  +matches(raw,hash)
+  +encode(raw)
+}
+class UserRepository <<control>> {
+  +findByUsername()
+  +findByEmailIgnoreCase()
+  +save(user)
+}
+class User <<entity>>
+class "users (table)" as UsersTable <<entity>>
+
+ProfilePage --> CustomerProfileController
+CustomerProfileController --> ProfileService
+ProfileService --> PasswordEncoder
+ProfileService --> UserRepository
+UserRepository --> User
+User .. UsersTable : ORM map
+@enduml

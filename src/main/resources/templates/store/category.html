@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục sản phẩm - TechParadise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css(v='20260415m')}" href="/css/main.css?v=20260415m">
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="logo" href="/">
+            <span class="logo-mark">TP</span>
+            <span class="logo-text">TechParadise</span>
+        </a>
+
+        <div class="header-search">
+            <input id="search" class="search-input" placeholder="Bạn cần tìm gì?">
+            <button class="btn btn-solid" type="button" onclick="TechStore.searchFromHeader()">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/></svg>
+                </span>
+                Tìm
+            </button>
+        </div>
+
+        <nav class="header-actions">
+            <a class="action" href="/cart" onclick="return TechStore.goCart(event)">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6h15l-2 10H7L6 6Z"/>
+                        <path d="M6 6 5 3H2"/>
+                        <circle cx="9" cy="20" r="1"/>
+                        <circle cx="18" cy="20" r="1"/>
+                    </svg>
+                </span>
+                <span class="action-label">Giỏ hàng</span>
+                <span id="cart-badge" class="badge">0</span>
+            </a>
+
+            <a id="orders-link" class="action" href="/orders" style="display:none;">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 6h12"/>
+                        <path d="M8 12h12"/>
+                        <path d="M8 18h12"/>
+                        <path d="M4 6h.01"/>
+                        <path d="M4 12h.01"/>
+                        <path d="M4 18h.01"/>
+                    </svg>
+                </span>
+                <span class="action-label">Đơn hàng</span>
+            </a>
+
+            <a id="admin-link" class="action" href="/admin/dashboard" style="display:none;">Quản trị</a>
+
+            <a id="login-link" class="action" href="/login">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                </span>
+                <span class="action-label" data-login-label>Đăng nhập</span>
+            </a>
+            <a id="register-link" class="action action-cta" href="/register">Đăng ký</a>
+            <button id="logout-btn" class="action action-ghost" type="button" style="display:none;" onclick="TechStore.logout()">Đăng xuất</button>
+        </nav>
+    </div>
+</header>
+
+<a class="side-banner side-banner-left" href="/#store-voucher-section" aria-label="Khuyến mãi phụ kiện">
+    <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn-pc-gvn-sticky-t1-26.png" alt="Banner PC khuyến mãi">
+</a>
+<a class="side-banner side-banner-right" href="/#market-zones-section" aria-label="Deal laptop gaming">
+    <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn-laptop-gaming-sticky-t1-26.png" alt="Banner deal laptop gaming">
+</a>
+
+<main class="container page category-page">
+    <div class="page-head category-page-head">
+        <div>
+            <p class="category-breadcrumb">
+                <a href="/">Trang chủ</a>
+                <span>/</span>
+                <span id="category-breadcrumb-name">Danh mục</span>
+            </p>
+        </div>
+        <a class="btn btn-outline" href="/">← Về trang chủ</a>
+    </div>
+
+    <section id="category-top-banner" class="category-top-banner" style="display:none;" aria-label="Banner danh mục">
+        <img id="category-top-banner-image" class="category-top-banner-image" src="" alt="Banner danh mục">
+        <button id="category-top-banner-prev" class="category-top-banner-nav prev" type="button" style="display:none;" aria-label="Ảnh trước">&#8249;</button>
+        <button id="category-top-banner-next" class="category-top-banner-nav next" type="button" style="display:none;" aria-label="Ảnh sau">&#8250;</button>
+        <div id="category-top-banner-dots" class="category-top-banner-dots" style="display:none;" aria-label="Điều hướng banner"></div>
+    </section>
+
+    <section class="market-zone category-zone">
+        <header class="market-zone-head category-zone-head category-filter-head">
+            <div class="category-filter-row">
+                <button class="category-filter-pill category-filter-pill-label" type="button" disabled aria-label="Bộ lọc">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M3 5h18"/><path d="M6 12h12"/><path d="M10 19h4"/></svg>
+                    </span>
+                    Bộ lọc
+                </button>
+
+                <div class="category-filter-item" id="filter-item-stock">
+                    <select id="filter-stock" class="select category-filter-select" aria-label="Tình trạng sản phẩm">
+                        <option value="">Tình trạng sản phẩm</option>
+                        <option value="in">Còn hàng</option>
+                        <option value="out">Hết hàng</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-price">
+                    <select id="filter-price" class="select category-filter-select" aria-label="Giá">
+                        <option value="">Giá</option>
+                        <option value="under5">Dưới 5 triệu</option>
+                        <option value="5to10">5 - 10 triệu</option>
+                        <option value="10to20">10 - 20 triệu</option>
+                        <option value="20to30">20 - 30 triệu</option>
+                        <option value="30plus">Trên 30 triệu</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-brand">
+                    <select id="filter-brand" class="select category-filter-select" aria-label="Hãng">
+                        <option value="">Hãng</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-cpu">
+                    <select id="filter-cpu" class="select category-filter-select" aria-label="CPU">
+                        <option value="">CPU</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-screen">
+                    <select id="filter-screen" class="select category-filter-select" aria-label="Kích thước màn hình">
+                        <option value="">Kích thước màn hình</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-usage">
+                    <select id="filter-usage" class="select category-filter-select" aria-label="Nhu cầu sử dụng">
+                        <option value="">Nhu cầu sử dụng</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-storage">
+                    <select id="filter-storage" class="select category-filter-select" aria-label="Ổ cứng">
+                        <option value="">Ổ cứng</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-ram">
+                    <select id="filter-ram" class="select category-filter-select" aria-label="RAM">
+                        <option value="">RAM</option>
+                    </select>
+                </div>
+                <div class="category-filter-item" id="filter-item-gpu">
+                    <select id="filter-gpu" class="select category-filter-select" aria-label="Card đồ hoạ">
+                        <option value="">Card đồ hoạ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="category-filter-footer">
+                <div class="category-filter-sort-wrap">
+                    <label class="field-label" for="category-sort">Xếp theo:</label>
+                    <select id="category-sort" class="select category-sort-select">
+                        <option value="featured">Nổi bật</option>
+                        <option value="newest">Mới nhất</option>
+                        <option value="priceAsc">Giá tăng dần</option>
+                        <option value="priceDesc">Giá giảm dần</option>
+                        <option value="nameAsc">Tên A-Z</option>
+                        <option value="nameDesc">Tên Z-A</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <div id="category-products" class="product-grid category-products-grid" aria-live="polite"></div>
+        <div id="category-empty" class="market-empty" style="display:none;">Không có sản phẩm phù hợp với bộ lọc hiện tại.</div>
+        <div class="category-pagination-wrap">
+            <nav id="category-pagination" class="category-pagination" aria-label="Phân trang sản phẩm" style="display:none;"></nav>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/site_footer :: storefrontFooter}"></div>
+
+<script th:src="@{/js/ui.js(v='20260408f')}" src="/js/ui.js?v=20260408f"></script>
+<script th:src="@{/js/site.js(v='20260415m')}" src="/js/site.js?v=20260415m"></script>
+<script th:src="@{/js/category.js(v='20260415b')}" src="/js/category.js?v=20260415b"></script>
+</body>
+</html>

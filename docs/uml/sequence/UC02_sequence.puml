@@ -1,0 +1,38 @@
+@startuml UC02_sequence
+title UC02 - Dang nhap
+actor "Nguoi dung (Customer/Admin)" as User
+boundary "LoginPage" as LoginPage
+control "AuthController" as AuthController
+control "AuthService" as AuthService
+control "AuthenticationManager" as AuthenticationManager
+control "JwtService" as JwtService
+database "UserRepository / users" as UserRepo
+
+User -> LoginPage : Mo form Dang nhap
+User -> LoginPage : Nhap username/email + password
+User -> LoginPage : Bam nut Dang nhap
+LoginPage -> AuthController : POST /api/auth/login
+AuthController -> AuthService : login(LoginRequest)
+AuthService -> UserRepo : findByUsernameIgnoreCase()\nor findByEmailIgnoreCase()
+UserRepo --> AuthService : User/null
+AuthService -> AuthenticationManager : authenticate(identifier,password)
+alt Dang nhap dung
+  AuthenticationManager --> AuthService : Authenticated
+  AuthService -> JwtService : generateToken(userDetails)
+  JwtService --> AuthService : JWT token
+  AuthService -> UserRepo : save(reset failed attempts,\nlockout, lastLoginAt)
+  AuthService --> AuthController : AuthResponse(token, role)
+  AuthController --> LoginPage : Set HttpOnly cookie + AuthResponse
+  LoginPage --> User : Chuyen vao man hinh theo quyen
+else Sai thong tin / tai khoan tam khoa
+  AuthenticationManager --> AuthService : AuthenticationException
+  AuthService -> UserRepo : save(failedLoginAttempts/lockout)
+  AuthService --> AuthController : IllegalArgumentException
+  AuthController --> LoginPage : 400 + message loi
+  LoginPage --> User : Hien thi thong bao loi
+else Loi CSDL
+  UserRepo --> AuthService : DataAccessException
+  AuthController --> LoginPage : 500 Loi he thong
+  LoginPage --> User : Hien thi Loi he thong
+end
+@enduml

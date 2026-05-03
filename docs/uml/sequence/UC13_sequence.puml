@@ -1,0 +1,62 @@
+@startuml UC13_sequence
+title UC13 - Quan ly don hang (Admin)
+actor "Admin" as Admin
+boundary "AdminOrderPage" as AdminOrderPage
+control "AdminOrderController" as AdminOrderController
+control "OrderService" as OrderService
+control "OrderStatusHistoryService" as OrderStatusHistoryService
+control "AdminAuditLogService" as AuditService
+control "EmailNotificationService" as EmailNotificationService
+database "OrderRepository / orders + order_items" as OrderRepo
+database "OrderStatusHistoryRepository /\norder_status_history" as HistoryRepo
+database "AdminAuditLogRepository /\nadmin_audit_logs" as AuditRepo
+
+Admin -> AdminOrderPage : Mo trang Quan ly don
+AdminOrderPage -> AdminOrderController : GET /api/admin/orders/paged
+AdminOrderController -> OrderService : findAllSummariesPaged(...)
+OrderService -> OrderRepo : searchAdminOrders(...)
+OrderRepo --> OrderService : Page<Order>
+OrderService --> AdminOrderController : Page<OrderSummaryResponse>
+AdminOrderController --> AdminOrderPage : Hien thi danh sach don
+
+Admin -> AdminOrderPage : Bam vao 1 don hang
+AdminOrderPage -> AdminOrderController : GET /api/admin/orders/{id}
+AdminOrderController -> OrderService : getOrderDetailForAdmin(id)
+OrderService -> OrderRepo : findByIdWithItems(id)
+OrderService -> HistoryRepo : findByOrderIdOrderByCreatedAtAsc(id)
+OrderService --> AdminOrderController : OrderDetailResponse
+AdminOrderController --> AdminOrderPage : Hien thi chi tiet + lich su
+
+alt Bam nut Cap nhat trang thai
+  Admin -> AdminOrderPage : Chon status moi + Bam Luu
+  AdminOrderPage -> AdminOrderController : PATCH /api/admin/orders/{id}/status
+  AdminOrderController -> OrderService : updateStatusSummary(id,status,actor)
+  OrderService -> OrderRepo : findByIdWithItems(id)
+  OrderService -> OrderRepo : save(order status moi)
+  OrderService -> OrderStatusHistoryService : saveHistorySafe(...)
+  OrderService -> EmailNotificationService : sendOrderStatusChanged(...)
+  AdminOrderController -> AuditService : logAction(ORDER_STATUS_UPDATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  AdminOrderController --> AdminOrderPage : OrderSummaryResponse
+else Bam nut Xoa don
+  Admin -> AdminOrderPage : Bam Xoa don
+  AdminOrderPage -> AdminOrderController : DELETE /api/admin/orders/{id}
+  AdminOrderController -> OrderService : deleteOrderByAdmin(id,actor)
+  OrderService -> OrderRepo : findByIdWithItems(id)
+  OrderService -> HistoryRepo : deleteByOrderId(id)
+  OrderService -> OrderRepo : delete(order)
+  AdminOrderController -> AuditService : logAction(ORDER_DELETE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  AdminOrderController --> AdminOrderPage : MessageResponse "Da xoa"
+end
+
+alt Trang thai cap nhat khong hop le /\nkhong cho xoa don da giao/da thanh toan
+  OrderService --> AdminOrderController : IllegalArgumentException
+  AdminOrderController --> AdminOrderPage : 400 + thong bao loi
+  AdminOrderPage --> Admin : Hien thi loi
+else Loi CSDL
+  OrderRepo --> OrderService : DataAccessException
+  AdminOrderController --> AdminOrderPage : 500 Loi he thong
+  AdminOrderPage --> Admin : Hien thi Loi he thong
+end
+@enduml

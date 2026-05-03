@@ -1,0 +1,907 @@
+@startuml UC01_analysis
+title UC01 - Dang ky tai khoan - Analysis Class
+skinparam classAttributeIconSize 0
+
+class RegisterPage <<boundary>> {
+  +fullName
+  +username
+  +email
+  +phone
+  +address
+  +password
+  +confirmPassword
+  +clickDangKy()
+}
+class AuthController <<control>> {
+  +register(request)
+}
+class AuthService <<control>> {
+  +register(request)
+}
+class PasswordEncoder <<control>> {
+  +encode(rawPassword)
+}
+class UserRepository <<control>> {
+  +existsByUsernameIgnoreCase()
+  +existsByEmailIgnoreCase()
+  +save(user)
+}
+class User <<entity>> {
+  +id
+  +username
+  +fullName
+  +email
+  +password
+  +phone
+  +address
+  +role
+}
+class "users (table)" as UsersTable <<entity>>
+
+RegisterPage --> AuthController
+AuthController --> AuthService
+AuthService --> PasswordEncoder
+AuthService --> UserRepository
+UserRepository --> User
+User .. UsersTable : ORM map
+@enduml
+
+@startuml UC02_analysis
+title UC02 - Dang nhap - Analysis Class
+skinparam classAttributeIconSize 0
+
+class LoginPage <<boundary>> {
+  +identifier
+  +password
+  +clickDangNhap()
+}
+class AuthController <<control>> {
+  +login(request)
+}
+class AuthService <<control>> {
+  +login(request)
+}
+class AuthenticationManager <<control>> {
+  +authenticate(identifier,password)
+}
+class JwtService <<control>> {
+  +generateToken(userDetails)
+}
+class UserRepository <<control>> {
+  +findByUsernameIgnoreCase()
+  +findByEmailIgnoreCase()
+  +save(user)
+}
+class User <<entity>> {
+  +id
+  +username
+  +password
+  +role
+  +failedLoginAttempts
+  +lockoutUntil
+}
+class "users (table)" as UsersTable <<entity>>
+
+LoginPage --> AuthController
+AuthController --> AuthService
+AuthService --> AuthenticationManager
+AuthService --> JwtService
+AuthService --> UserRepository
+UserRepository --> User
+User .. UsersTable : ORM map
+@enduml
+
+@startuml UC03_analysis
+title UC03 - Quen va dat lai mat khau - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ForgotResetPage <<boundary>> {
+  +identifier
+  +token
+  +newPassword
+  +clickGuiToken()
+  +clickDatLai()
+}
+class AuthController <<control>> {
+  +forgotPassword(request)
+  +verifyResetToken(request)
+  +resetPassword(request)
+}
+class PasswordResetService <<control>> {
+  +forgotPassword(identifier)
+  +verifyResetToken(token)
+  +resetPassword(token,newPassword)
+}
+class EmailNotificationService <<control>> {
+  +sendPasswordResetToken(user,token)
+}
+class PasswordEncoder <<control>> {
+  +encode(newPassword)
+}
+class UserRepository <<control>> {
+  +findByUsernameIgnoreCase()
+  +findByEmailIgnoreCase()
+  +save(user)
+}
+class PasswordResetTokenRepository <<control>> {
+  +save(token)
+  +findByTokenHash()
+  +findByUserIdAndUsedAtIsNull()
+}
+class User <<entity>>
+class PasswordResetToken <<entity>> {
+  +tokenHash
+  +expiresAt
+  +usedAt
+}
+class "users (table)" as UsersTable <<entity>>
+class "password_reset_tokens (table)" as TokenTable <<entity>>
+
+ForgotResetPage --> AuthController
+AuthController --> PasswordResetService
+PasswordResetService --> EmailNotificationService
+PasswordResetService --> PasswordEncoder
+PasswordResetService --> UserRepository
+PasswordResetService --> PasswordResetTokenRepository
+PasswordResetTokenRepository --> PasswordResetToken
+UserRepository --> User
+User .. UsersTable : ORM map
+PasswordResetToken .. TokenTable : ORM map
+@enduml
+
+@startuml UC04_analysis
+title UC04 - Xem san pham theo danh muc - Analysis Class
+skinparam classAttributeIconSize 0
+
+class CategoryProductPage <<boundary>> {
+  +selectedCategoryId
+  +loadCategories()
+  +filterProductsByCategory()
+}
+class CategoryController <<control>> {
+  +getAll()
+}
+class CategoryService <<control>> {
+  +findAll()
+}
+class ProductController <<control>> {
+  +getAllProducts(keyword,categoryId)
+}
+class ProductService <<control>> {
+  +getPublicProducts(keyword,categoryId)
+}
+class CategoryRepository <<control>> {
+  +findAll()
+}
+class ProductRepository <<control>> {
+  +findByCategoryId()
+}
+class Category <<entity>> {
+  +id
+  +name
+  +description
+}
+class Product <<entity>> {
+  +id
+  +name
+  +price
+  +imageUrl
+  +category
+}
+class "categories (table)" as CategoriesTable <<entity>>
+class "products (table)" as ProductsTable <<entity>>
+
+CategoryProductPage --> CategoryController
+CategoryProductPage --> ProductController
+CategoryController --> CategoryService
+CategoryService --> CategoryRepository
+ProductController --> ProductService
+ProductService --> ProductRepository
+CategoryRepository --> Category
+ProductRepository --> Product
+Category .. CategoriesTable : ORM map
+Product .. ProductsTable : ORM map
+@enduml
+
+@startuml UC05_analysis
+title UC05 - Tim kiem san pham - Analysis Class
+skinparam classAttributeIconSize 0
+
+class SearchBar <<boundary>> {
+  +keyword
+  +clickSearch()
+}
+class ProductController <<control>> {
+  +getAllProducts(keyword,categoryId)
+  +getAllProductsPaged(keyword,categoryId,page,size)
+}
+class ProductService <<control>> {
+  +getPublicProducts(keyword,categoryId)
+  +getPublicProductsPaged(keyword,categoryId,page,size)
+}
+class ProductRepository <<control>> {
+  +findByNameContainingIgnoreCase()
+  +searchPublicProducts()
+}
+class Product <<entity>> {
+  +id
+  +name
+  +price
+  +discountPercent
+  +stock
+}
+class "products (table)" as ProductsTable <<entity>>
+
+SearchBar --> ProductController
+ProductController --> ProductService
+ProductService --> ProductRepository
+ProductRepository --> Product
+Product .. ProductsTable : ORM map
+@enduml
+
+@startuml UC06_analysis
+title UC06 - Xem chi tiet san pham - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ProductDetailPage <<boundary>> {
+  +productId
+  +loadProductInfo()
+  +loadVariants()
+  +loadReviews()
+  +loadReviewSummary()
+}
+class ProductController <<control>> {
+  +getProductById(id)
+  +getProductVariants(id)
+  +getProductReviews(id,user)
+  +getReviewSummary(id,user)
+}
+class ProductService <<control>> {
+  +getProductById(id)
+}
+class ProductVariantService <<control>> {
+  +getByProductId(id)
+}
+class ProductReviewService <<control>> {
+  +getPublicReviews(productId,user)
+  +getReviewSummary(productId,user)
+}
+class ProductRepository <<control>> {
+  +findById(id)
+}
+class ProductVariantRepository <<control>> {
+  +findByProductIdOrderBySortOrderAscIdAsc()
+}
+class ProductReviewRepository <<control>> {
+  +findByProductIdOrderByCreatedAtDesc()
+  +countByProductId()
+  +averageRatingByProductId()
+}
+class Product <<entity>>
+class ProductVariant <<entity>>
+class ProductReview <<entity>>
+class "products (table)" as ProductsTable <<entity>>
+class "product_variants (table)" as VariantTable <<entity>>
+class "product_reviews (table)" as ReviewTable <<entity>>
+
+ProductDetailPage --> ProductController
+ProductController --> ProductService
+ProductController --> ProductVariantService
+ProductController --> ProductReviewService
+ProductService --> ProductRepository
+ProductVariantService --> ProductVariantRepository
+ProductReviewService --> ProductReviewRepository
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+ProductReviewRepository --> ProductReview
+Product .. ProductsTable : ORM map
+ProductVariant .. VariantTable : ORM map
+ProductReview .. ReviewTable : ORM map
+@enduml
+
+@startuml UC07_analysis
+title UC07 - Quan ly gio hang - Analysis Class
+skinparam classAttributeIconSize 0
+
+class CartPage <<boundary>> {
+  +productId
+  +variantId
+  +quantity
+  +clickAddToCart()
+  +clickUpdateQuantity()
+  +clickRemoveItem()
+  +clickClearCart()
+}
+class CustomerCartController <<control>> {
+  +myCart()
+  +addItem()
+  +updateItemQuantity()
+  +removeItem()
+  +clear()
+}
+class CartService <<control>> {
+  +getCart(username)
+  +addItem(username,request)
+  +setItemQuantity(username,productId,variantId,request)
+  +removeItem(username,productId,variantId)
+  +clearCart(username)
+}
+class ProductPricingService <<control>> {
+  +calculateDiscountedPrice()
+}
+class UserRepository <<control>>
+class ProductRepository <<control>>
+class ProductVariantRepository <<control>>
+class CartItemRepository <<control>>
+class User <<entity>>
+class Product <<entity>>
+class ProductVariant <<entity>>
+class CartItem <<entity>> {
+  +userId
+  +productId
+  +productVariantId
+  +quantity
+}
+class "cart_items (table)" as CartTable <<entity>>
+
+CartPage --> CustomerCartController
+CustomerCartController --> CartService
+CartService --> ProductPricingService
+CartService --> UserRepository
+CartService --> ProductRepository
+CartService --> ProductVariantRepository
+CartService --> CartItemRepository
+UserRepository --> User
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+CartItemRepository --> CartItem
+CartItem .. CartTable : ORM map
+@enduml
+
+@startuml UC08_analysis
+title UC08 - Dat hang va thanh toan - Analysis Class
+skinparam classAttributeIconSize 0
+
+class CheckoutPage <<boundary>> {
+  +recipientName
+  +recipientPhone
+  +shippingAddress
+  +paymentMethod
+  +promotionCode
+  +items[]
+  +clickConfirmOrder()
+  +clickPayOnline()
+}
+class CustomerOrderController <<control>> {
+  +createOrder(request)
+}
+class OrderService <<control>> {
+  +createOrderSummary(username,request)
+  +createOrder(username,request)
+}
+class PromotionService <<control>> {
+  +findValidPromotionOrThrow(code)
+}
+class CustomerPaymentController <<control>> {
+  +createSession(request)
+}
+class PaymentService <<control>> {
+  +createSession(username,orderId,provider,ip)
+  +handleWebhookOrReturn(...)
+}
+class OrderStatusHistoryService <<control>> {
+  +saveHistorySafe(...)
+}
+class UserRepository <<control>>
+class ProductRepository <<control>>
+class ProductVariantRepository <<control>>
+class PromotionRepository <<control>>
+class OrderRepository <<control>>
+class Order <<entity>>
+class OrderItem <<entity>>
+class Product <<entity>>
+class ProductVariant <<entity>>
+class Promotion <<entity>>
+class OrderStatusHistory <<entity>>
+class "orders (table)" as OrdersTable <<entity>>
+class "order_items (table)" as OrderItemsTable <<entity>>
+class "order_status_history (table)" as HistoryTable <<entity>>
+
+CheckoutPage --> CustomerOrderController
+CheckoutPage --> CustomerPaymentController
+CustomerOrderController --> OrderService
+OrderService --> PromotionService
+OrderService --> OrderStatusHistoryService
+OrderService --> UserRepository
+OrderService --> ProductRepository
+OrderService --> ProductVariantRepository
+OrderService --> OrderRepository
+PromotionService --> PromotionRepository
+CustomerPaymentController --> PaymentService
+PaymentService --> OrderRepository
+OrderRepository --> Order
+OrderRepository --> OrderItem
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+PromotionRepository --> Promotion
+OrderStatusHistoryService --> OrderStatusHistory
+Order .. OrdersTable : ORM map
+OrderItem .. OrderItemsTable : ORM map
+OrderStatusHistory .. HistoryTable : ORM map
+@enduml
+
+@startuml UC09_analysis
+title UC09 - Quan ly thong tin ca nhan - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ProfilePage <<boundary>> {
+  +fullName
+  +email
+  +phone
+  +address
+  +currentPassword
+  +newPassword
+  +clickSaveProfile()
+}
+class CustomerProfileController <<control>> {
+  +me()
+  +update(request)
+}
+class ProfileService <<control>> {
+  +getProfile(username)
+  +updateProfile(username,request)
+}
+class PasswordEncoder <<control>> {
+  +matches(raw,hash)
+  +encode(raw)
+}
+class UserRepository <<control>> {
+  +findByUsername()
+  +findByEmailIgnoreCase()
+  +save(user)
+}
+class User <<entity>>
+class "users (table)" as UsersTable <<entity>>
+
+ProfilePage --> CustomerProfileController
+CustomerProfileController --> ProfileService
+ProfileService --> PasswordEncoder
+ProfileService --> UserRepository
+UserRepository --> User
+User .. UsersTable : ORM map
+@enduml
+
+@startuml UC10_analysis
+title UC10 - Danh gia san pham da mua - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ReviewDialog <<boundary>> {
+  +productId
+  +rating
+  +content
+  +clickSubmitReview()
+  +clickDeleteMyReview()
+}
+class CustomerProductReviewController <<control>> {
+  +upsertReview(productId,request)
+  +deleteMyReview(productId)
+}
+class ProductReviewService <<control>> {
+  +upsertMyReview(productId,username,request)
+  +deleteMyReview(productId,username)
+}
+class UserRepository <<control>>
+class ProductRepository <<control>>
+class OrderItemRepository <<control>>
+class ProductReviewRepository <<control>>
+class User <<entity>>
+class Product <<entity>>
+class OrderItem <<entity>>
+class ProductReview <<entity>> {
+  +productId
+  +userId
+  +rating
+  +content
+}
+class "product_reviews (table)" as ReviewTable <<entity>>
+
+ReviewDialog --> CustomerProductReviewController
+CustomerProductReviewController --> ProductReviewService
+ProductReviewService --> UserRepository
+ProductReviewService --> ProductRepository
+ProductReviewService --> OrderItemRepository
+ProductReviewService --> ProductReviewRepository
+ProductReviewRepository --> ProductReview
+ProductReview .. ReviewTable : ORM map
+@enduml
+
+@startuml UC11_analysis
+title UC11 - Quan ly danh muc san pham (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminCategoryPage <<boundary>> {
+  +name
+  +description
+  +clickCreateCategory()
+  +clickUpdateCategory()
+  +clickDeleteCategory()
+}
+class CategoryController <<control>> {
+  +getAll()
+  +create(category)
+  +update(id,category)
+  +delete(id)
+}
+class CategoryService <<control>> {
+  +findAll()
+  +create(category)
+  +update(id,category)
+  +delete(id)
+}
+class AdminAuditLogService <<control>> {
+  +logAction(...)
+}
+class CategoryRepository <<control>>
+class ProductRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Category <<entity>>
+class Product <<entity>>
+class AdminAuditLog <<entity>>
+class "categories (table)" as CategoriesTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminCategoryPage --> CategoryController
+CategoryController --> CategoryService
+CategoryController --> AdminAuditLogService
+CategoryService --> CategoryRepository
+CategoryService --> ProductRepository
+AdminAuditLogService --> AdminAuditLogRepository
+CategoryRepository --> Category
+ProductRepository --> Product
+AdminAuditLogRepository --> AdminAuditLog
+Category .. CategoriesTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml
+
+@startuml UC12_analysis
+title UC12 - Quan ly san pham (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminProductPage <<boundary>> {
+  +productForm
+  +variantGrid
+  +clickCreateProduct()
+  +clickUpdateProduct()
+  +clickDeleteProduct()
+  +clickSaveVariants()
+}
+class AdminProductController <<control>> {
+  +getPagedProducts(...)
+  +createProduct(product)
+  +updateProduct(id,product)
+  +deleteProduct(id)
+  +replaceVariants(id,requests)
+}
+class ProductService <<control>>
+class ProductVariantService <<control>>
+class AdminAuditLogService <<control>>
+class ProductRepository <<control>>
+class CategoryRepository <<control>>
+class ProductVariantRepository <<control>>
+class OrderItemRepository <<control>>
+class CartItemRepository <<control>>
+class ProductReviewRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Product <<entity>>
+class ProductVariant <<entity>>
+class Category <<entity>>
+class AdminAuditLog <<entity>>
+class "products (table)" as ProductsTable <<entity>>
+class "product_variants (table)" as VariantsTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminProductPage --> AdminProductController
+AdminProductController --> ProductService
+AdminProductController --> ProductVariantService
+AdminProductController --> AdminAuditLogService
+ProductService --> ProductRepository
+ProductService --> CategoryRepository
+ProductService --> OrderItemRepository
+ProductService --> CartItemRepository
+ProductService --> ProductVariantRepository
+ProductService --> ProductReviewRepository
+ProductVariantService --> ProductVariantRepository
+AdminAuditLogService --> AdminAuditLogRepository
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+CategoryRepository --> Category
+AdminAuditLogRepository --> AdminAuditLog
+Product .. ProductsTable : ORM map
+ProductVariant .. VariantsTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml
+
+@startuml UC13_analysis
+title UC13 - Quan ly don hang (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminOrderPage <<boundary>> {
+  +orderFilters
+  +statusAction
+  +clickViewOrder()
+  +clickUpdateStatus()
+  +clickDeleteOrder()
+}
+class AdminOrderController <<control>> {
+  +findAllPaged(...)
+  +detail(id)
+  +updateStatus(id,request)
+  +deleteOrder(id)
+}
+class OrderService <<control>> {
+  +findAllSummariesPaged(...)
+  +getOrderDetailForAdmin(id)
+  +updateStatusSummary(id,status,actor)
+  +deleteOrderByAdmin(id,actor)
+}
+class OrderStatusHistoryService <<control>> {
+  +saveHistorySafe(...)
+}
+class AdminAuditLogService <<control>> {
+  +logAction(...)
+}
+class OrderRepository <<control>>
+class OrderStatusHistoryRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Order <<entity>>
+class OrderItem <<entity>>
+class OrderStatusHistory <<entity>>
+class AdminAuditLog <<entity>>
+class "orders (table)" as OrdersTable <<entity>>
+class "order_items (table)" as OrderItemsTable <<entity>>
+class "order_status_history (table)" as HistoryTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminOrderPage --> AdminOrderController
+AdminOrderController --> OrderService
+AdminOrderController --> AdminAuditLogService
+OrderService --> OrderStatusHistoryService
+OrderService --> OrderRepository
+OrderService --> OrderStatusHistoryRepository
+AdminAuditLogService --> AdminAuditLogRepository
+OrderRepository --> Order
+OrderRepository --> OrderItem
+OrderStatusHistoryRepository --> OrderStatusHistory
+AdminAuditLogRepository --> AdminAuditLog
+Order .. OrdersTable : ORM map
+OrderItem .. OrderItemsTable : ORM map
+OrderStatusHistory .. HistoryTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml
+
+@startuml UC14_analysis
+title UC14 - Quan ly tai khoan (Admin/Super Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminUserPage <<boundary>> {
+  +userForm
+  +roleSelector
+  +clickCreateUser()
+  +clickUpdateUser()
+  +clickDeleteCustomer()
+  +clickUpdateRole()
+}
+class UserManagementController <<control>> {
+  +allUsersPaged(...)
+  +createUser(request)
+  +updateUserInfo(id,request)
+  +deleteCustomer(id)
+  +updateRole(id,request)
+}
+class UserManagementService <<control>> {
+  +findUsersPaged(...)
+  +createUser(request,allowCreateAdminRole)
+  +updateUserInfo(id,request)
+  +deleteCustomer(id)
+  +updateRole(id,role)
+}
+class AdminAuditLogService <<control>> {
+  +logAction(...)
+}
+class UserRepository <<control>>
+class OrderRepository <<control>>
+class CartItemRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class User <<entity>>
+class Order <<entity>>
+class CartItem <<entity>>
+class AdminAuditLog <<entity>>
+class "users (table)" as UsersTable <<entity>>
+class "orders (table)" as OrdersTable <<entity>>
+class "cart_items (table)" as CartTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminUserPage --> UserManagementController
+UserManagementController --> UserManagementService
+UserManagementController --> AdminAuditLogService
+UserManagementService --> UserRepository
+UserManagementService --> OrderRepository
+UserManagementService --> CartItemRepository
+AdminAuditLogService --> AdminAuditLogRepository
+UserRepository --> User
+OrderRepository --> Order
+CartItemRepository --> CartItem
+AdminAuditLogRepository --> AdminAuditLog
+User .. UsersTable : ORM map
+Order .. OrdersTable : ORM map
+CartItem .. CartTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml
+
+@startuml UC15_analysis
+title UC15 - Quan ly khuyen mai (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminPromotionPage <<boundary>> {
+  +code
+  +discountPercent
+  +startDate
+  +endDate
+  +active
+  +clickCreatePromotion()
+  +clickUpdatePromotion()
+  +clickDeletePromotion()
+}
+class PromotionController <<control>> {
+  +findAll()
+  +create(promotion)
+  +update(id,promotion)
+  +delete(id)
+}
+class PromotionService <<control>> {
+  +findAll()
+  +create(promotion)
+  +update(id,promotion)
+  +delete(id)
+  +findValidPromotionOrThrow(code)
+}
+class AdminAuditLogService <<control>>
+class PromotionRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Promotion <<entity>>
+class AdminAuditLog <<entity>>
+class "promotions (table)" as PromotionsTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminPromotionPage --> PromotionController
+PromotionController --> PromotionService
+PromotionController --> AdminAuditLogService
+PromotionService --> PromotionRepository
+AdminAuditLogService --> AdminAuditLogRepository
+PromotionRepository --> Promotion
+AdminAuditLogRepository --> AdminAuditLog
+Promotion .. PromotionsTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml
+
+@startuml UC16_analysis
+title UC16 - Quan ly banner (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminBannerPage <<boundary>> {
+  +imageUrl
+  +targetUrl
+  +altText
+  +clickCreateBanner()
+  +clickDeleteBanner()
+}
+class HomeBannerController <<control>> {
+  +getAdminHomeBanners()
+  +createHomeBanner(request)
+  +deleteHomeBanner(id)
+}
+class HomeBannerService <<control>> {
+  +findAdminHomeBanners()
+  +create(request)
+  +delete(id)
+}
+class AdminAuditLogService <<control>>
+class HomeBannerRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class HomeBanner <<entity>>
+class AdminAuditLog <<entity>>
+class "home_banners (table)" as BannerTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminBannerPage --> HomeBannerController
+HomeBannerController --> HomeBannerService
+HomeBannerController --> AdminAuditLogService
+HomeBannerService --> HomeBannerRepository
+AdminAuditLogService --> AdminAuditLogRepository
+HomeBannerRepository --> HomeBanner
+AdminAuditLogRepository --> AdminAuditLog
+HomeBanner .. BannerTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml
+
+@startuml UC17_analysis
+title UC17 - Khach hang nhan tin ho tro - Analysis Class
+skinparam classAttributeIconSize 0
+
+class SupportChatPage <<boundary>> {
+  +messageInput
+  +clickLoadSummary()
+  +clickLoadConversation()
+  +clickSendMessage()
+}
+class CustomerSupportMessageController <<control>> {
+  +getInboxSummary()
+  +getConversation(markRead)
+  +sendMessage(request)
+}
+class SupportMessageService <<control>> {
+  +getCustomerInboxSummary(username)
+  +getCustomerConversation(username,markRead)
+  +sendCustomerMessage(username,content)
+}
+class UserRepository <<control>>
+class SupportMessageRepository <<control>>
+class User <<entity>>
+class SupportMessage <<entity>> {
+  +customerId
+  +senderUserId
+  +senderRole
+  +content
+  +readByAdmin
+  +readByCustomer
+}
+class "users (table)" as UsersTable <<entity>>
+class "support_messages (table)" as SupportTable <<entity>>
+
+SupportChatPage --> CustomerSupportMessageController
+CustomerSupportMessageController --> SupportMessageService
+SupportMessageService --> UserRepository
+SupportMessageService --> SupportMessageRepository
+UserRepository --> User
+SupportMessageRepository --> SupportMessage
+User .. UsersTable : ORM map
+SupportMessage .. SupportTable : ORM map
+@enduml
+
+@startuml UC18_analysis
+title UC18 - Admin phan hoi ho tro - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminSupportInboxPage <<boundary>> {
+  +conversationList
+  +replyInput
+  +clickLoadConversations()
+  +clickOpenConversation()
+  +clickSendReply()
+}
+class AdminSupportMessageController <<control>> {
+  +getConversations()
+  +getConversation(customerId,markRead)
+  +sendReply(customerId,request)
+}
+class SupportMessageService <<control>> {
+  +getAdminConversations(adminUsername)
+  +getAdminConversation(adminUsername,customerId,markRead)
+  +sendAdminReply(adminUsername,customerId,content)
+}
+class UserRepository <<control>>
+class SupportMessageRepository <<control>>
+class User <<entity>>
+class SupportMessage <<entity>>
+class "users (table)" as UsersTable <<entity>>
+class "support_messages (table)" as SupportTable <<entity>>
+
+AdminSupportInboxPage --> AdminSupportMessageController
+AdminSupportMessageController --> SupportMessageService
+SupportMessageService --> UserRepository
+SupportMessageService --> SupportMessageRepository
+UserRepository --> User
+SupportMessageRepository --> SupportMessage
+User .. UsersTable : ORM map
+SupportMessage .. SupportTable : ORM map
+@enduml

@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - TechParadise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}" href="/css/main.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="logo" href="/">
+            <span class="logo-mark">TP</span>
+            <span class="logo-text">TechParadise</span>
+        </a>
+
+        <div class="header-search">
+            <input id="search" class="search-input" placeholder="Bạn cần tìm gì?">
+            <button class="btn btn-solid" type="button" onclick="TechStore.searchFromHeader()">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/></svg>
+                </span>
+                Tìm
+            </button>
+        </div>
+
+        <nav class="header-actions">
+            <a class="action" href="/cart" onclick="return TechStore.goCart(event)">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6h15l-2 10H7L6 6Z"/>
+                        <path d="M6 6 5 3H2"/>
+                        <circle cx="9" cy="20" r="1"/>
+                        <circle cx="18" cy="20" r="1"/>
+                    </svg>
+                </span>
+                <span class="action-label">Giỏ hàng</span>
+                <span id="cart-badge" class="badge">0</span>
+            </a>
+
+            <a id="orders-link" class="action" href="/orders" style="display:none;">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 6h12"/>
+                        <path d="M8 12h12"/>
+                        <path d="M8 18h12"/>
+                        <path d="M4 6h.01"/>
+                        <path d="M4 12h.01"/>
+                        <path d="M4 18h.01"/>
+                    </svg>
+                </span>
+                <span class="action-label">Đơn hàng</span>
+            </a>
+
+            <a id="admin-link" class="action" href="/admin/dashboard" style="display:none;">Quản trị</a>
+
+            <a id="login-link" class="action" href="/login">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                </span>
+                <span class="action-label" data-login-label>Đăng nhập</span>
+            </a>
+            <a id="register-link" class="action action-cta" href="/register">Đăng ký</a>
+            <button id="logout-btn" class="action action-ghost" type="button" style="display:none;" onclick="TechStore.logout()">Đăng xuất</button>
+        </nav>
+    </div>
+</header>
+
+<main class="container page">
+    <div class="page-head">
+        <h1>Thanh toán</h1>
+    </div>
+
+    <section id="checkout-empty" class="empty-state" style="display:none;">
+        <div class="empty-card">
+            <h2>Chưa có sản phẩm để thanh toán</h2>
+            <a class="btn btn-solid" href="/">Về trang chủ</a>
+            <a class="btn btn-outline" href="/cart">Xem giỏ hàng</a>
+        </div>
+    </section>
+
+    <section id="checkout-content" class="grid-2" style="display:none;">
+        <div class="card">
+            <div class="card-head">
+                <h2>Thông tin giao hàng</h2>
+            </div>
+            <div class="card-body">
+                <div class="checkout-address-grid">
+                    <div class="form-row">
+                        <label class="field-label" for="recipient-name">Người nhận</label>
+                        <input id="recipient-name" class="input" placeholder="Họ và tên người nhận" autocomplete="name" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="field-label" for="recipient-phone">Số điện thoại</label>
+                        <input id="recipient-phone" class="input" placeholder="Nhập số điện thoại người nhận" autocomplete="tel" required>
+                    </div>
+                </div>
+
+                <div class="checkout-address-grid">
+                    <div class="form-row">
+                        <label class="field-label" for="shipping-province">Tỉnh/Thành phố</label>
+                        <select id="shipping-province" class="select" required>
+                            <option value="">Chọn tỉnh/thành phố</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label class="field-label" for="shipping-district">Quận/Huyện</label>
+                        <input id="shipping-district" class="input" list="district-suggestions" placeholder="Nhập hoặc chọn quận/huyện" required>
+                        <datalist id="district-suggestions"></datalist>
+                    </div>
+                </div>
+
+                <label class="field-label" for="shipping-detail">Địa chỉ chi tiết</label>
+                <textarea id="shipping-detail" class="textarea" rows="3" placeholder="Số nhà, tên đường, phường/xã..." required></textarea>
+
+                <label class="field-label" for="shipping-note" style="margin-top: 10px;">Ghi chú giao hàng</label>
+                <textarea id="shipping-note" class="textarea" rows="2" placeholder="VD: Giao giờ hành chính, gọi trước khi giao..."></textarea>
+
+                <textarea id="shipping-address" class="textarea" rows="2" style="display:none;"></textarea>
+                <div id="shipping-preview" class="shipping-preview muted"></div>
+
+                <div class="divider" style="margin: 18px 0 12px;">
+                    <span>Thanh toán</span>
+                </div>
+
+                <!-- tac dung code: tach rieng tung cach thanh toan + icon de khach de nhan biet va chon nhanh. -->
+                <div class="radio-group payment-options" role="radiogroup" aria-label="Phương thức thanh toán">
+                    <label class="radio-card payment-card payment-cod">
+                        <input type="radio" name="paymentOption" value="COD" checked>
+                        <span class="payment-icon-wrap" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+                        </span>
+                        <div>
+                            <div class="radio-title">COD</div>
+                            <div class="muted">Thanh toán khi nhận hàng</div>
+                        </div>
+                    </label>
+                    <label class="radio-card payment-card payment-vnpay">
+                        <input type="radio" name="paymentOption" value="ONLINE_VNPAY">
+                        <span class="payment-icon-wrap" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>
+                        </span>
+                        <div>
+                            <div class="radio-title">VNPay</div>
+                            <div class="muted">Thanh toán online qua VNPay</div>
+                        </div>
+                    </label>
+                    <label class="radio-card payment-card payment-momo">
+                        <input type="radio" name="paymentOption" value="ONLINE_MOMO">
+                        <span class="payment-icon-wrap" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M7 14V10h2l1 2 1-2h2v4"/></svg>
+                        </span>
+                        <div>
+                            <div class="radio-title">MoMo</div>
+                            <div class="muted">Ví MoMo (sandbox)</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <aside class="card summary">
+            <div class="card-head">
+                <h2>Đơn hàng</h2>
+            </div>
+            <div class="card-body">
+                <div id="checkout-items" class="mini-list"></div>
+
+                <div class="promo-box">
+                    <label class="field-label" for="promo-code">Mã khuyến mãi</label>
+                    <div class="promo-row">
+                        <input id="promo-code" class="input" placeholder="VD: WELCOME10">
+                        <button id="promo-apply" class="btn btn-outline" type="button" onclick="TechStore.applyPromo()">Áp dụng</button>
+                    </div>
+                    <div id="promo-hint" class="muted hint" style="margin-top:8px; display:none;"></div>
+                </div>
+
+                <div class="kv">
+                    <span class="muted">Tạm tính</span>
+                    <strong id="checkout-subtotal">0 đ</strong>
+                </div>
+                <div class="kv" id="discount-row" style="display:none;">
+                    <span class="muted" id="discount-label">Giảm giá</span>
+                    <strong id="checkout-discount">- 0 đ</strong>
+                </div>
+                <div class="kv total">
+                    <span>Tổng cộng</span>
+                    <strong id="checkout-total">0 đ</strong>
+                </div>
+                <button id="place-order-btn" class="btn btn-solid btn-block" type="button" onclick="TechStore.placeOrder()">Đặt hàng</button>
+                <a class="btn btn-outline btn-block" href="/cart">Quay lại giỏ hàng</a>
+                <div id="checkout-message" class="message" style="margin-top:10px;"></div>
+            </div>
+        </aside>
+    </section>
+</main>
+
+<div th:replace="~{fragments/site_footer :: storefrontFooter}"></div>
+
+<script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script th:src="@{/js/site.js}" src="/js/site.js"></script>
+<script th:src="@{/js/checkout.js(v='20260419c')}" src="/js/checkout.js?v=20260419c"></script>
+</body>
+</html>

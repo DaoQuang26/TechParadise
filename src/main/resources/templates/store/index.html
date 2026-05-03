@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechParadise - Thế giới công nghệ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css(v='20260419a')}" href="/css/main.css?v=20260419a">
+</head>
+<body>
+<!-- Header chung: logo + danh mục + tìm kiếm + tài khoản + giỏ hàng -->
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="logo" href="/">
+            <span class="logo-mark">TP</span>
+            <span class="logo-text">TechParadise</span>
+        </a>
+
+        <button class="catalog-btn" type="button" onclick="TechStore.toggleCatalog()">
+            <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </span>
+            Danh mục
+        </button>
+
+        <div class="header-search">
+            <input id="search" class="search-input" placeholder="Bạn cần tìm gì?">
+            <button class="btn btn-solid" type="button" onclick="TechStore.searchFromHeader()">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/></svg>
+                </span>
+                Tìm
+            </button>
+        </div>
+
+        <nav class="header-actions">
+            <a class="action" href="/cart" onclick="return TechStore.goCart(event)">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6h15l-2 10H7L6 6Z"/>
+                        <path d="M6 6 5 3H2"/>
+                        <circle cx="9" cy="20" r="1"/>
+                        <circle cx="18" cy="20" r="1"/>
+                    </svg>
+                </span>
+                <span class="action-label">Giỏ hàng</span>
+                <span id="cart-badge" class="badge">0</span>
+            </a>
+
+            <a id="orders-link" class="action" href="/orders" style="display:none;">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 6h12"/>
+                        <path d="M8 12h12"/>
+                        <path d="M8 18h12"/>
+                        <path d="M4 6h.01"/>
+                        <path d="M4 12h.01"/>
+                        <path d="M4 18h.01"/>
+                    </svg>
+                </span>
+                <span class="action-label">Đơn hàng</span>
+            </a>
+
+            <a id="admin-link" class="action" href="/admin/dashboard" style="display:none;">Quản trị</a>
+
+            <a id="login-link" class="action" href="/login">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                </span>
+                <span class="action-label" data-login-label>Đăng nhập</span>
+            </a>
+            <a id="register-link" class="action action-cta" href="/register">Đăng ký</a>
+            <button id="logout-btn" class="action action-ghost" type="button" style="display:none;" onclick="TechStore.logout()">Đăng xuất</button>
+        </nav>
+    </div>
+</header>
+
+<a class="side-banner side-banner-left" href="#store-voucher-section" aria-label="Khuyến mãi phụ kiện">
+    <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn-pc-gvn-sticky-t1-26.png" alt="Banner PC khuyến mãi">
+</a>
+<a class="side-banner side-banner-right" href="#market-zones-section" aria-label="Deal laptop gaming">
+    <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn-laptop-gaming-sticky-t1-26.png" alt="Banner deal laptop gaming">
+</a>
+
+<main class="container store-page">
+    <section class="store-hero">
+        <aside id="catalog" class="sidebar catalog" aria-label="Danh mục">
+            <div class="sidebar-head">
+                <strong>Danh mục sản phẩm</strong>
+                <button class="icon-btn" type="button" onclick="TechStore.toggleCatalog()" aria-label="Đóng">×</button>
+            </div>
+            <ul id="category-list" class="category-list"></ul>
+        </aside>
+
+        <div class="hero-grid">
+            <div class="banner banner-main">
+                <div id="home-banner-slider" class="home-banner-slider" aria-label="Banner nổi bật">
+                    <a class="home-banner-slide active" href="#market-zones-section" aria-label="Deal laptop gaming">
+                        <img src="https://cdn.hstatic.net/files/200000722513/file/banner_msi.1.jpg" alt="Banner MSI">
+                    </a>
+                    <a class="home-banner-slide" href="#market-zones-section" aria-label="Banner GIGABYTE">
+                        <img src="https://cdn.hstatic.net/files/200000722513/file/gigabyte.jpg" alt="Banner GIGABYTE">
+                    </a>
+
+                    <button id="home-banner-prev" class="home-banner-nav prev" type="button" aria-label="Ảnh trước">&#8249;</button>
+                    <button id="home-banner-next" class="home-banner-nav next" type="button" aria-label="Ảnh sau">&#8250;</button>
+                </div>
+            </div>
+
+            <a class="banner banner-mini" href="#store-voucher-section" aria-label="Ưu đãi cuối tuần">
+                <img class="banner-mini-bg" src="https://cdn.hstatic.net/files/200000722513/file/gearvn-ban-phim-sub-banner-t1-26.png" alt="Banner ưu đãi cuối tuần">
+                <div class="banner-mini-content">
+                    <div class="tag">Ưu đãi</div>
+                    <h2>Giảm giá cuối tuần</h2>
+                </div>
+            </a>
+
+            <a class="banner banner-mini alt" href="#store-vibe-section" aria-label="Chính sách bảo hành và hỗ trợ kỹ thuật">
+                <img class="banner-mini-bg" src="https://cdn.hstatic.net/files/200000722513/file/gearvn-laptop-van-phong-sub-banner-t1-26.png" alt="Banner hỗ trợ kỹ thuật và bảo hành">
+                <div class="banner-mini-content">
+                    <div class="tag">Bảo hành</div>
+                    <h2>Hỗ trợ kỹ thuật</h2>
+                </div>
+            </a>
+        </div>
+
+        <section class="hero-benefits" aria-label="Lợi ích mua sắm">
+            <div class="hero-benefits-head">
+                <h3>Mua công nghệ an tâm hơn</h3>
+                <a href="#store-vibe-section">Xem chi tiết</a>
+            </div>
+            <div class="hero-benefits-grid">
+                <article class="hero-benefit-card tone-delivery">
+                    <span class="hero-benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M3 7h12v10H3z"/><path d="M15 10h3l3 3v4h-6z"/><circle cx="8" cy="18" r="1"/><circle cx="18" cy="18" r="1"/></svg>
+                    </span>
+                    <div>
+                        <strong>Giao nhanh toàn quốc</strong>
+                        <p>Đóng gói kỹ, theo dõi đơn hàng real-time.</p>
+                    </div>
+                </article>
+
+                <article class="hero-benefit-card tone-warranty">
+                    <span class="hero-benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4.2 2.9 8 7 9 4.1-1 7-4.8 7-9V6z"/><path d="m9.5 12 1.8 1.8L15 10"/></svg>
+                    </span>
+                    <div>
+                        <strong>Bảo hành minh bạch</strong>
+                        <p>Chính sách đổi trả rõ ràng, xử lý nhanh.</p>
+                    </div>
+                </article>
+
+                <article class="hero-benefit-card tone-installment">
+                    <span class="hero-benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M8 15h3"/></svg>
+                    </span>
+                    <div>
+                        <strong>Trả góp linh hoạt</strong>
+                        <p>Hỗ trợ 0%, thủ tục nhanh chóng.</p>
+                    </div>
+                </article>
+
+                <article class="hero-benefit-card tone-config">
+                    <span class="hero-benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg>
+                    </span>
+                    <div>
+                        <strong>Tư vấn cấu hình</strong>
+                        <p>Gợi ý build PC và setup theo ngân sách.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </section>
+
+    <!-- Khu phân loại kiểu marketplace -->
+    <section class="section market-zones-section" id="market-zones-section">
+        <div class="section-head">
+            <div>
+                <h2>Các loại sản phẩm nổi bật</h2>
+            </div>
+        </div>
+        <div id="market-zones" class="market-zones" aria-live="polite"></div>
+    </section>
+
+    <section class="section store-pulse-section" id="store-pulse-section">
+        <div id="store-pulse" class="store-pulse-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="section store-vibe-section" id="store-vibe-section">
+        <div class="store-vibe-grid">
+            <article class="store-vibe-panel trust-panel">
+                <div class="store-vibe-head">
+                    <h3>Mua sắm an tâm</h3>
+                </div>
+                <div class="trust-list">
+                    <div class="trust-item">
+                        <span class="trust-icon" aria-hidden="true">01</span>
+                        <div>
+                            <strong>Giao nhanh toàn quốc</strong>
+                            <p>Đóng gói kỹ, theo dõi đơn hàng theo thời gian thực.</p>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-icon" aria-hidden="true">02</span>
+                        <div>
+                            <strong>Hỗ trợ kỹ thuật 1:1</strong>
+                            <p>Tư vấn cấu hình phù hợp cho học tập, làm việc và gaming.</p>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-icon" aria-hidden="true">03</span>
+                        <div>
+                            <strong>Bảo hành minh bạch</strong>
+                            <p>Chính sách đổi trả rõ ràng, xử lý nhanh khi có sự cố.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="store-vibe-panel">
+                <div class="store-vibe-head">
+                    <h3>Thương hiệu đang hot</h3>
+                </div>
+                <div id="trending-brands" class="trending-brands" aria-live="polite"></div>
+            </article>
+
+            <article class="store-vibe-panel">
+                <div class="store-vibe-head">
+                    <h3>Đánh giá nhanh từ khách hàng</h3>
+                </div>
+                <div id="quick-reviews" class="quick-reviews" aria-live="polite"></div>
+            </article>
+        </div>
+    </section>
+
+    <section class="section voucher-banner-section" id="store-voucher-section">
+        <div class="section-head">
+            <div>
+                <h2>Voucher Đang Có</h2>
+            </div>
+        </div>
+
+        <div class="voucher-banner-grid">
+            <a class="voucher-banner" href="#market-zones-section">
+                <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn-laptop-van-phong-sub-banner-t1-26.png" alt="Voucher giảm giá đơn hàng công nghệ">
+                <div class="voucher-banner-content">
+                    <strong>Voucher 12%</strong>
+                    <span>Đơn từ 5.000.000đ</span>
+                </div>
+            </a>
+
+            <a class="voucher-banner" href="#market-zones-section">
+                <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn-gaming-gear-sub-banner-t1-26.png" alt="Voucher phụ kiện gaming">
+                <div class="voucher-banner-content">
+                    <strong>Gaming Gear -20%</strong>
+                    <span>Chuột, bàn phím, tai nghe</span>
+                </div>
+            </a>
+
+            <a class="voucher-banner" href="#market-zones-section">
+                <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn_800x400.jpg" alt="Voucher trả góp 0 phần trăm">
+                <div class="voucher-banner-content">
+                    <strong>Trả góp 0%</strong>
+                    <span>Áp dụng laptop và màn hình</span>
+                </div>
+            </a>
+
+            <a class="voucher-banner" href="#market-zones-section">
+                <img src="https://cdn.hstatic.net/files/200000722513/file/gearvn-man-hinh-sub-banner-t1-26.png" alt="Voucher màn hình đồ họa">
+                <div class="voucher-banner-content">
+                    <strong>Màn hình đồ họa</strong>
+                    <span>Giảm thêm 800.000đ</span>
+                </div>
+            </a>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/site_footer :: storefrontFooter}"></div>
+
+<script th:src="@{/js/ui.js(v='20260408d')}" src="/js/ui.js?v=20260408d"></script>
+<script th:src="@{/js/site.js(v='20260415m')}" src="/js/site.js?v=20260415m"></script>
+<script th:src="@{/js/store.js(v='20260415b')}" src="/js/store.js?v=20260415b"></script>
+</body>
+</html>

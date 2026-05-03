@@ -1,0 +1,60 @@
+@startuml UC11_sequence
+title UC11 - Quan ly danh muc san pham (Admin)
+actor "Admin" as Admin
+boundary "AdminCategoryPage" as AdminCategoryPage
+control "CategoryController" as CategoryController
+control "CategoryService" as CategoryService
+control "AdminAuditLogService" as AuditService
+database "CategoryRepository / categories" as CategoryRepo
+database "ProductRepository / products" as ProductRepo
+database "AdminAuditLogRepository /\nadmin_audit_logs" as AuditRepo
+
+Admin -> AdminCategoryPage : Mo trang Danh muc
+AdminCategoryPage -> CategoryController : GET /api/public/categories
+CategoryController -> CategoryService : findAll()
+CategoryService -> CategoryRepo : findAll()
+CategoryRepo --> CategoryService : List<Category>
+CategoryService --> CategoryController : List<Category>
+CategoryController --> AdminCategoryPage : Hien thi danh sach
+
+alt Bam nut Them danh muc
+  Admin -> AdminCategoryPage : Nhap name, description + Bam Luu
+  AdminCategoryPage -> CategoryController : POST /api/admin/categories
+  CategoryController -> CategoryService : create(category)
+  CategoryService -> CategoryRepo : existsByNameIgnoreCase(name)
+  CategoryService -> CategoryRepo : save(category)
+  CategoryController -> AuditService : logAction(CATEGORY_CREATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  CategoryController --> AdminCategoryPage : 201 Created
+else Bam nut Sua danh muc
+  Admin -> AdminCategoryPage : Sua name/description + Bam Luu
+  AdminCategoryPage -> CategoryController : PUT /api/admin/categories/{id}
+  CategoryController -> CategoryService : update(id,category)
+  CategoryService -> CategoryRepo : findById(id)
+  CategoryService -> CategoryRepo : existsByNameIgnoreCaseAndIdNot()
+  CategoryService -> CategoryRepo : save(category)
+  CategoryController -> AuditService : logAction(CATEGORY_UPDATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  CategoryController --> AdminCategoryPage : 200 Updated
+else Bam nut Xoa danh muc
+  Admin -> AdminCategoryPage : Bam Xoa
+  AdminCategoryPage -> CategoryController : DELETE /api/admin/categories/{id}
+  CategoryController -> CategoryService : delete(id)
+  CategoryService -> CategoryRepo : existsById(id)
+  CategoryService -> ProductRepo : countByCategoryId(id)
+  CategoryService -> CategoryRepo : deleteById(id)
+  CategoryController -> AuditService : logAction(CATEGORY_DELETE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  CategoryController --> AdminCategoryPage : 204 No Content
+end
+
+alt Ten trung / category dang duoc dung / khong ton tai
+  CategoryService --> CategoryController : IllegalArgumentException
+  CategoryController --> AdminCategoryPage : 400 + thong bao loi
+  AdminCategoryPage --> Admin : Hien thi loi
+else Loi CSDL
+  CategoryRepo --> CategoryService : DataAccessException
+  CategoryController --> AdminCategoryPage : 500 Loi he thong
+  AdminCategoryPage --> Admin : Hien thi Loi he thong
+end
+@enduml

@@ -1,0 +1,57 @@
+@startuml UC07_sequence
+title UC07 - Quan ly gio hang
+actor "Khach hang" as Customer
+boundary "CartPage" as CartPage
+control "CustomerCartController" as CartController
+control "CartService" as CartService
+database "UserRepository / users" as UserRepo
+database "ProductRepository / products" as ProductRepo
+database "ProductVariantRepository /\nproduct_variants" as VariantRepo
+database "CartItemRepository / cart_items" as CartItemRepo
+
+Customer -> CartPage : Bam nut Them vao gio (tu trang san pham)
+CartPage -> CartController : POST /api/customer/cart/items
+CartController -> CartService : addItem(username, request)
+CartService -> UserRepo : findByUsername(username)
+CartService -> ProductRepo : findById(productId)
+CartService -> VariantRepo : findByProductIdOrderBySortOrderAscIdAsc()
+CartService -> CartItemRepo : findByUserIdAndProductIdAndProductVariantId()
+CartService -> CartItemRepo : save(cartItem)
+CartService -> CartItemRepo : findByUserIdOrderByUpdatedAtDesc()
+CartService -> VariantRepo : findAllById(variantIds)
+CartService --> CartController : CartResponse
+CartController --> CartPage : Gio hang moi
+
+alt Bam nut tang/giam so luong
+  Customer -> CartPage : Bam nut + / -
+  CartPage -> CartController : PUT /api/customer/cart/items/{productId}?variantId
+  CartController -> CartService : setItemQuantity(...)
+  CartService -> CartItemRepo : save(quantity moi)
+  CartService --> CartController : CartResponse
+  CartController --> CartPage : Cap nhat tong tien
+else Bam nut Xoa dong san pham
+  Customer -> CartPage : Bam nut Xoa
+  CartPage -> CartController : DELETE /api/customer/cart/items/{productId}?variantId
+  CartController -> CartService : removeItem(...)
+  CartService -> CartItemRepo : delete(cartItem)
+  CartService --> CartController : CartResponse
+  CartController --> CartPage : Gio hang sau khi xoa
+else Bam nut Xoa tat ca
+  Customer -> CartPage : Bam nut Xoa tat ca
+  CartPage -> CartController : DELETE /api/customer/cart
+  CartController -> CartService : clearCart(username)
+  CartService -> CartItemRepo : deleteByUserId(userId)
+  CartService --> CartController : CartResponse rong
+  CartController --> CartPage : Gio hang rong
+end
+
+alt Product/variant/quantity khong hop le
+  CartService --> CartController : IllegalArgumentException
+  CartController --> CartPage : 400 + thong bao loi
+  CartPage --> Customer : Hien thi loi
+else Loi CSDL
+  CartItemRepo --> CartService : DataAccessException
+  CartController --> CartPage : 500 Loi he thong
+  CartPage --> Customer : Hien thi Loi he thong
+end
+@enduml

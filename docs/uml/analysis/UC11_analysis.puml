@@ -1,0 +1,47 @@
+@startuml UC11_analysis
+title UC11 - Quan ly danh muc san pham (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminCategoryPage <<boundary>> {
+  +name
+  +description
+  +clickCreateCategory()
+  +clickUpdateCategory()
+  +clickDeleteCategory()
+}
+class CategoryController <<control>> {
+  +getAll()
+  +create(category)
+  +update(id,category)
+  +delete(id)
+}
+class CategoryService <<control>> {
+  +findAll()
+  +create(category)
+  +update(id,category)
+  +delete(id)
+}
+class AdminAuditLogService <<control>> {
+  +logAction(...)
+}
+class CategoryRepository <<control>>
+class ProductRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Category <<entity>>
+class Product <<entity>>
+class AdminAuditLog <<entity>>
+class "categories (table)" as CategoriesTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminCategoryPage --> CategoryController
+CategoryController --> CategoryService
+CategoryController --> AdminAuditLogService
+CategoryService --> CategoryRepository
+CategoryService --> ProductRepository
+AdminAuditLogService --> AdminAuditLogRepository
+CategoryRepository --> Category
+ProductRepository --> Product
+AdminAuditLogRepository --> AdminAuditLog
+Category .. CategoriesTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml

@@ -1,0 +1,242 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - TechParadise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}" href="/css/main.css">
+</head>
+<body class="auth-page auth-login-page">
+<!-- Auth layout: nền + thẻ đăng nhập (trái: branding, phải: form) -->
+<div class="auth-layout">
+    <div class="auth-grid">
+        <div class="auth-card">
+            <!-- Khối visual/branding -->
+            <div class="auth-visual">
+                <div class="auth-brand">
+                    <span class="logo-mark">TP</span>
+                    <div>
+                        <div class="auth-brand-name">TechParadise</div>
+                        <div class="auth-brand-sub">Thế giới công nghệ</div>
+                    </div>
+                </div>
+                <div class="auth-eyebrow">Member Access</div>
+
+                <h1>Chào mừng trở lại</h1>
+                <p>Đăng nhập để quản lý giỏ hàng, thanh toán nhanh và theo dõi đơn hàng.</p>
+
+                <div class="auth-points" aria-label="Lợi ích">
+                    <div class="auth-point"><span class="auth-dot"></span><span>Sản phẩm chính hãng, bảo hành rõ ràng</span></div>
+                    <div class="auth-point"><span class="auth-dot"></span><span>Thanh toán nhanh và an toàn</span></div>
+                    <div class="auth-point"><span class="auth-dot"></span><span>Theo dõi đơn hàng mọi lúc</span></div>
+                </div>
+
+                <div class="auth-insight-grid" aria-label="Thông tin nhanh">
+                    <div class="auth-insight-item">
+                        <strong>2h</strong>
+                        <span>Giao hỏa tốc nội thành</span>
+                    </div>
+                    <div class="auth-insight-item">
+                        <strong>0%</strong>
+                        <span>Trả góp cho đơn phù hợp</span>
+                    </div>
+                    <div class="auth-insight-item">
+                        <strong>99%</strong>
+                        <span>Khách hàng đánh giá tốt</span>
+                    </div>
+                </div>
+
+                <a class="auth-home" href="/">← Về trang chủ</a>
+            </div>
+
+            <!-- Form đăng nhập: gọi API /api/auth/login (xem js/auth.js) -->
+            <form class="auth-form auth-form-login" onsubmit="techstoreAuth.login(event)">
+                <div class="auth-top">
+                    <h2>Đăng nhập</h2>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="username">Tên đăng nhập hoặc Email</label>
+                    <div class="input-with-icon">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="8" r="4"></circle>
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                            </svg>
+                        </span>
+                        <input id="username" class="input" autocomplete="username" placeholder="username hoặc email" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="field-label" for="password">Mật khẩu</label>
+                    <div class="password-wrap">
+                        <div class="input-with-icon" style="flex: 1;">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                    <path d="M6 11h12v10H6z"></path>
+                                </svg>
+                            </span>
+                            <input id="password" class="input" type="password" autocomplete="current-password" required>
+                        </div>
+
+                        <!-- Nút đổi type=password<->text để hiện/ẩn mật khẩu -->
+                        <button class="btn btn-outline btn-icon" type="button" onclick="techstoreAuth.togglePassword('password')" aria-label="Hiển thị mật khẩu">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="auth-links">
+                        <button class="link-btn" type="button" onclick="techstoreAuth.openForgotPasswordModal()">Quên mật khẩu?</button>
+                    </div>
+                </div>
+
+                <!-- Lỗi đăng nhập sẽ được JS gán vào đây -->
+                <div id="error" class="error-msg"></div>
+
+                <button class="btn btn-solid btn-block" type="submit">Đăng nhập</button>
+
+                <div class="divider"><span>hoặc</span></div>
+
+                <div class="auth-footer auth-footer-between">
+                    <a class="btn btn-outline" href="/register">Tạo tài khoản</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Forgot/reset password modal:
+     Step 1: request token by username/email
+     Step 2: verify token, then submit new password -->
+<div id="forgot-password-modal" class="modal" aria-hidden="true">
+    <div class="modal-overlay" data-close="1"></div>
+    <div class="modal-card auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title">
+        <div class="modal-head">
+            <h3 id="forgot-password-title" style="margin:0;">Quên mật khẩu</h3>
+            <button class="icon-btn" type="button" data-close="1" aria-label="Đóng">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="auth-reset-flow-head">
+                <div class="auth-reset-steps" aria-label="Tiến trình đặt lại mật khẩu">
+                    <div id="reset-step-request" class="auth-reset-step is-active">
+                        <span>1</span>
+                        <strong>Xác thực tài khoản</strong>
+                    </div>
+                    <div id="reset-step-submit" class="auth-reset-step">
+                        <span>2</span>
+                        <strong>Đặt lại mật khẩu</strong>
+                    </div>
+                </div>
+            </div>
+
+            <form id="forgot-password-form" onsubmit="techstoreAuth.requestPasswordReset(event)">
+                <div class="form-row">
+                    <label class="field-label" for="forgot-identifier">Email hoặc tên đăng nhập</label>
+                    <input id="forgot-identifier" class="input" placeholder="Nhập email hoặc username" required>
+                </div>
+
+                <div id="forgot-password-message" class="message" style="display:none;"></div>
+                <p id="forgot-resend-cooldown" class="muted auth-reset-cooldown" style="display:none;"></p>
+
+                <button id="forgot-submit-btn" class="btn btn-solid btn-block" type="submit" data-idle-text="Gửi mã qua email">Gửi mã qua email</button>
+            </form>
+
+            <section id="reset-password-section" class="auth-reset-section" hidden>
+                <div class="divider" style="margin:16px 0;"><span>Đặt lại mật khẩu</span></div>
+
+                <p id="reset-token-hint" class="muted auth-reset-hint" style="display:none;"></p>
+
+                <form id="reset-token-form" class="auth-reset-token-stage" onsubmit="techstoreAuth.verifyResetToken(event)">
+                    <div class="form-row">
+                        <label class="field-label" for="reset-token">Mã reset</label>
+                        <input id="reset-token" class="input" placeholder="Nhập mã reset từ email" required>
+                    </div>
+
+                    <div id="reset-token-message" class="message" style="display:none;"></div>
+
+                    <div class="auth-reset-actions">
+                        <button class="btn btn-outline" type="button" onclick="techstoreAuth.backToForgotStep()">Quay lại bước 1</button>
+                        <button id="reset-verify-btn" class="btn btn-primary" type="submit" data-idle-text="Xác thực mã">Xác thực mã</button>
+                    </div>
+                </form>
+
+                <form id="reset-password-form" class="auth-reset-password-stage" onsubmit="techstoreAuth.submitResetPassword(event)" hidden>
+                    <input id="reset-token-confirmed" type="hidden">
+
+                    <div class="form-row">
+                        <label class="field-label" for="reset-password-new">Mật khẩu mới</label>
+                        <div class="password-wrap">
+                            <div class="input-with-icon" style="flex: 1;">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                        <path d="M6 11h12v10H6z"></path>
+                                    </svg>
+                                </span>
+                                <input id="reset-password-new" class="input" type="password" minlength="7" required>
+                            </div>
+                            <button class="btn btn-outline btn-icon" type="button" onclick="techstoreAuth.togglePassword('reset-password-new')" aria-label="Hiển thị mật khẩu">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <ul id="reset-password-rules" class="auth-password-rules" aria-live="polite">
+                        <li id="rule-length" class="auth-password-rule">Tối thiểu 7 ký tự</li>
+                    </ul>
+
+                    <div class="form-row">
+                        <label class="field-label" for="reset-password-confirm">Xác nhận mật khẩu mới</label>
+                        <div class="password-wrap">
+                            <div class="input-with-icon" style="flex: 1;">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                        <path d="M6 11h12v10H6z"></path>
+                                    </svg>
+                                </span>
+                                <input id="reset-password-confirm" class="input" type="password" minlength="7" required>
+                            </div>
+                            <button class="btn btn-outline btn-icon" type="button" onclick="techstoreAuth.togglePassword('reset-password-confirm')" aria-label="Hiển thị mật khẩu">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="reset-password-message" class="message" style="display:none;"></div>
+
+                    <div class="auth-reset-actions">
+                        <button class="btn btn-outline" type="button" onclick="techstoreAuth.backToForgotStep()">Quay lại bước 1</button>
+                        <button id="reset-submit-btn" class="btn btn-primary" type="submit" data-idle-text="Đặt lại mật khẩu">Đặt lại mật khẩu</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script th:src="@{/js/auth.js(v='20260419b')}" src="/js/auth.js?v=20260419b"></script>
+</body>
+</html>

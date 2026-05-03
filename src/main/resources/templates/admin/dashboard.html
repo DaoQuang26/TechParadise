@@ -1,0 +1,1129 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quản trị - TechParadise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css(v='20260415n')}" href="/css/main.css?v=20260415n">
+</head>
+<body class="admin-page">
+<div class="admin-shell">
+    <!-- Top bar quản trị: hiển thị người dùng hiện tại + nút điều hướng nhanh -->
+    <nav class="admin-nav">
+        <div class="container admin-nav-inner">
+            <div class="admin-brand">
+                <span class="logo-mark">TP</span>
+                <div>
+                    <div class="admin-brand-name">TechParadise</div>
+                    <div class="admin-brand-sub">Admin Console</div>
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <div class="admin-user-pill" title="Tài khoản đang đăng nhập">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                    </span>
+                    <span id="admin-user"></span>
+                </div>
+                <a class="btn btn-dark" href="/">Trang bán hàng</a>
+                <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container admin-layout">
+        <!-- Giữ nguyên mục lục bên trái theo yêu cầu -->
+        <aside class="admin-aside" aria-label="Mục lục quản lý">
+            <div class="admin-aside-head">
+                <div class="admin-aside-title">Quản lý</div>
+                <div id="admin-role" class="muted"></div>
+            </div>
+
+            <div class="admin-menu" id="admin-menu">
+                <button class="admin-menu-item active" type="button" data-view="dashboard">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M9 21V12h6v9"/></svg>
+                    </span>
+                    Thống kê
+                </button>
+                <button class="admin-menu-item" type="button" data-view="orders">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M6 6h15l-2 10H7L6 6Z"/><path d="M6 6 5 3H2"/></svg>
+                    </span>
+                    Đơn hàng
+                </button>
+                <button class="admin-menu-item" type="button" data-view="products">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z"/><path d="M8 7V4h8v3"/></svg>
+                    </span>
+                    Sản phẩm
+                </button>
+                <button class="admin-menu-item" type="button" data-view="categories">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M4 6h7v7H4z"/><path d="M13 6h7v7h-7z"/><path d="M4 15h7v5H4z"/><path d="M13 15h7v5h-7z"/></svg>
+                    </span>
+                    Danh mục
+                </button>
+                <button class="admin-menu-item" type="button" data-view="promotions">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7"/><path d="M4 8h16v4H4z"/><path d="M12 21V8"/></svg>
+                    </span>
+                    Khuyến mãi
+                </button>
+                <button class="admin-menu-item" type="button" data-view="banners">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="m3 15 5-5 4 4 3-3 6 6"/></svg>
+                    </span>
+                    Banner
+                </button>
+                <button class="admin-menu-item" type="button" data-view="messages">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4V7a2 2 0 0 1 2-2Z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
+                    </span>
+                    Tin nhắn
+                </button>
+                <button class="admin-menu-item" type="button" data-view="users">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="17" cy="10" r="2"/><path d="M15 21a6 6 0 0 1 8 0"/></svg>
+                    </span>
+                    Tài khoản
+                </button>
+            </div>
+
+            <div class="admin-aside-foot muted">
+                <div>© 2026 TechParadise</div>
+                <div class="muted">Bảng điều khiển nội bộ</div>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <!-- View mặc định: thống kê -->
+            <section id="view-dashboard" class="admin-view">
+                <div class="view-head">
+                    <h2>Thống kê nhanh</h2>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card"><h4 id="total-orders">0</h4><p>Tổng đơn hàng</p></div>
+                    <div class="stat-card"><h4 id="total-customers">0</h4><p>Tổng khách hàng</p></div>
+                    <div class="stat-card"><h4 id="pending-orders">0</h4><p>Đơn đang chờ</p></div>
+                    <div class="stat-card"><h4 id="delivered-orders">0</h4><p>Đơn đã giao (toàn hệ thống)</p></div>
+                    <div class="stat-card"><h4 id="revenue">0 đ</h4><p>Doanh thu (đơn đã giao, toàn hệ thống)</p></div>
+                </div>
+
+                <div class="admin-grid">
+                    <section class="panel dashboard-orders-panel">
+                        <h3>Biểu đồ trạng thái đơn</h3>
+                        <canvas id="ordersChart" height="200"></canvas>
+                    </section>
+
+                    <section class="panel dashboard-revenue-panel">
+                        <div class="dashboard-chart-head">
+                            <h3 style="margin:0;">Biểu đồ doanh thu chi tiết</h3>
+                            <div class="dashboard-filters">
+                                <select id="revenue-range-days" class="select admin-filter-select">
+                                    <option value="7">7 ngày</option>
+                                    <option value="30" selected>30 ngày</option>
+                                    <option value="90">90 ngày</option>
+                                    <option value="365">365 ngày</option>
+                                </select>
+                                <select id="revenue-group-by" class="select admin-filter-select">
+                                    <option value="day" selected>Theo ngày</option>
+                                    <option value="week">Theo tuần</option>
+                                    <option value="month">Theo tháng</option>
+                                </select>
+                                <select id="revenue-chart-type" class="select admin-filter-select">
+                                    <option value="line" selected>Biểu đồ đường</option>
+                                    <option value="area">Biểu đồ vùng</option>
+                                    <option value="bar">Biểu đồ cột</option>
+                                </select>
+                                <button id="revenue-chart-refresh" class="btn btn-outline btn-sm admin-btn-refresh" type="button">Cập nhật</button>
+                            </div>
+                        </div>
+
+                        <canvas id="revenueChart" height="360"></canvas>
+
+                        <div class="dashboard-mini-stats">
+                            <div class="mini-stat">
+                                <span class="muted">Doanh thu kỳ chọn</span>
+                                <strong id="revenue-period-total">0 đ</strong>
+                            </div>
+                            <div class="mini-stat">
+                                <span id="revenue-period-orders-label" class="muted">Số đơn đã giao trong kỳ chọn</span>
+                                <strong id="revenue-period-orders">0</strong>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="muted">Giá trị TB / đơn</span>
+                                <strong id="revenue-period-aov">0 đ</strong>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="muted">Tăng trưởng so kỳ trước</span>
+                                <strong id="revenue-period-growth">0%</strong>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="muted">Đỉnh doanh thu</span>
+                                <strong id="revenue-period-peak">-</strong>
+                            </div>
+                        </div>
+
+                        <div id="revenue-chart-msg" class="message" style="margin-top:10px; display:none;"></div>
+                    </section>
+                </div>
+
+            </section>
+
+            <!-- View: quản lý đơn hàng (list + search + action icon) -->
+            <section id="view-orders" class="admin-view" hidden>
+                <div class="view-head">
+                    <h2>Quản lý đơn hàng</h2>
+                </div>
+
+                <section class="panel">
+                    <div class="panel-head panel-head-stack">
+                        <div>
+                            <h3 style="margin:0;">Danh sách đơn hàng</h3>
+                        </div>
+
+                        <div class="admin-toolbar orders-toolbar">
+                            <label class="admin-search" for="orders-search">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                                </span>
+                                <input id="orders-search" class="input admin-search-input" placeholder="Tìm theo mã đơn, khách hàng hoặc mã giao dịch...">
+                            </label>
+
+                            <select id="orders-sort-id" class="select admin-sort-select" aria-label="Sắp xếp đơn hàng theo ID">
+                                <option value="asc" selected>ID tăng dần</option>
+                                <option value="desc">ID giảm dần</option>
+                            </select>
+
+                            <select id="orders-status-filter" class="select admin-filter-select">
+                                <option value="">Tất cả trạng thái đơn</option>
+                                <option value="PENDING">Chờ xử lý</option>
+                                <option value="CONFIRMED">Đã xác nhận</option>
+                                <option value="SHIPPING">Đang giao</option>
+                                <option value="DELIVERED">Đã giao</option>
+                                <option value="CANCEL_REQUESTED">Yêu cầu hủy</option>
+                                <option value="CANCELLED">Đã hủy</option>
+                            </select>
+
+                            <select id="orders-payment-status-filter" class="select admin-filter-select">
+                                <option value="">Tất cả trạng thái thanh toán</option>
+                                <option value="PENDING">Chờ thanh toán</option>
+                                <option value="PAID">Đã thanh toán</option>
+                                <option value="FAILED">Thất bại</option>
+                            </select>
+
+                            <select id="orders-payment-provider-filter" class="select admin-filter-select">
+                                <option value="">Tất cả provider</option>
+                                <option value="VNPAY">VNPay</option>
+                                <option value="MOMO">MoMo</option>
+                            </select>
+
+                            <button class="btn btn-primary btn-sm" type="button" id="orders-seed-sample">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                </span>
+                                Táº¡o Ä‘Æ¡n máº«u
+                            </button>
+
+                            <button class="btn btn-outline btn-sm admin-btn-refresh" type="button" id="orders-refresh">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2.3 5.6"></path><path d="M20 4v7h-7"></path></svg>
+                                </span>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Thanh toán</th>
+                                <th>Mã giao dịch</th>
+                                <th>TT thanh toán</th>
+                                <th>TT đơn</th>
+                                <th>Tạo lúc</th>
+                                <th>Thanh toán lúc</th>
+                                <th class="col-center">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody id="orders-body"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- tac dung code: phan trang server-side cho danh sach don hang admin. -->
+                    <div class="admin-pagination" id="orders-pagination">
+                        <button id="orders-page-prev" class="btn btn-outline btn-sm" type="button">← Trước</button>
+                        <div id="orders-page-info" class="admin-pagination-info">Trang 1/1 • 0 bản ghi</div>
+                        <button id="orders-page-next" class="btn btn-outline btn-sm" type="button">Sau →</button>
+                    </div>
+
+                    <div id="orders-msg" class="message" style="margin-top:12px; display:none;"></div>
+                </section>
+            </section>
+
+            <!-- View: quản lý sản phẩm - mặc định hiện danh sách, bấm Sửa/Thêm mới để chuyển sang form bên phải -->
+            <section id="view-products" class="admin-view" hidden>
+                <div class="view-head">
+                    <h2>Quản lý sản phẩm</h2>
+                </div>
+
+                <section class="panel">
+                    <div class="panel-head panel-head-stack">
+                        <div>
+                            <h3 style="margin:0;">Danh sách sản phẩm</h3>
+                        </div>
+
+                        <div class="admin-toolbar">
+                            <label class="admin-search" for="products-search">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                                </span>
+                                <input id="products-search" class="input admin-search-input" placeholder="Tìm theo tên, danh mục, giá...">
+                            </label>
+                            <select id="products-sort-id" class="select admin-sort-select" aria-label="Sắp xếp theo ID">
+                                <option value="asc" selected>ID tăng dần</option>
+                                <option value="desc">ID giảm dần</option>
+                            </select>
+                            <select id="products-category-filter" class="select admin-filter-select" aria-label="Lọc danh mục sản phẩm">
+                                <option value="">Tất cả danh mục</option>
+                            </select>
+                            <button class="btn btn-outline btn-sm" type="button" id="products-filter-apply">
+                                Lọc danh mục
+                            </button>
+                            <button class="btn btn-sm admin-btn-create" type="button" id="products-create">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                </span>
+                                Thêm mới
+                            </button>
+                            <button class="btn btn-outline btn-sm admin-btn-refresh" type="button" id="products-refresh">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2.3 5.6"></path><path d="M20 4v7h-7"></path></svg>
+                                </span>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Vùng hiển thị danh sách/chỉnh sửa: JS sẽ chuyển hidden giữa 2 panel -->
+                    <div class="admin-content-switch" id="products-content">
+                        <div id="products-list-panel" class="admin-list-panel">
+                            <div class="table-wrap">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th class="col-center">Ảnh</th>
+                                        <th>Tên</th>
+                                        <th>Danh mục</th>
+                                        <th class="col-right">Giá bán</th>
+                                        <th class="col-center">Kho</th>
+                                        <th class="col-center">Thao tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="products-body"></tbody>
+                                </table>
+                            </div>
+
+                            <!-- tac dung code: phan trang server-side cho danh sach san pham admin. -->
+                            <div class="admin-pagination" id="products-pagination">
+                                <button id="products-page-prev" class="btn btn-outline btn-sm" type="button">← Trước</button>
+                                <div id="products-page-info" class="admin-pagination-info">Trang 1/1 • 0 bản ghi</div>
+                                <button id="products-page-next" class="btn btn-outline btn-sm" type="button">Sau →</button>
+                            </div>
+                        </div>
+
+                        <div id="products-edit-panel" class="admin-edit-panel" hidden>
+                            <div class="edit-panel-head">
+                                <h4 id="product-form-mode">Tạo mới sản phẩm</h4>
+                                <button id="product-back-list" class="btn btn-outline btn-sm admin-btn-back" type="button">
+                                    <span class="icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path><path d="M9 12h11"></path></svg>
+                                    </span>
+                                    Quay lại danh sách
+                                </button>
+                            </div>
+
+                            <form id="product-form">
+                                <input id="product-id" type="hidden">
+
+                                <div class="form-row">
+                                    <label class="field-label" for="product-name">Tên sản phẩm</label>
+                                    <input id="product-name" class="input" required>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="product-category">Danh mục</label>
+                                    <select id="product-category" class="select" required></select>
+                                </div>
+
+                                <div class="admin-form-grid">
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-price">Giá gốc (VND)</label>
+                                        <input id="product-price" class="input" type="number" min="0" step="1000" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-discount">Khuyến mãi (%)</label>
+                                        <input id="product-discount" class="input" type="number" min="0" max="100" step="1" value="0">
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-stock">Tồn kho</label>
+                                        <input id="product-stock" class="input" type="number" min="0" step="1" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="product-media-files">Ảnh sản phẩm (1 hoặc nhiều ảnh)</label>
+                                    <input id="product-image" type="hidden">
+                                    <textarea id="product-gallery" hidden></textarea>
+
+                                    <div class="admin-upload-row">
+                                        <input id="product-media-files" class="input" type="file" accept="image/*" multiple>
+                                        <button id="product-media-upload" class="btn btn-outline btn-sm" type="button">
+                                            <span class="icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg>
+                                            </span>
+                                            Tải ảnh (1 nút)
+                                        </button>
+                                    </div>
+
+                                    <div class="admin-ai-enhance-box">
+                                        <div class="admin-form-grid">
+                                            <div class="form-row">
+                                                <label class="field-label" for="product-image-ai-prompt">Prompt làm đẹp ảnh</label>
+                                                <input id="product-image-ai-prompt" class="input" placeholder="VD: Làm nền sạch, tăng độ nét, ánh sáng studio, giữ màu thật của sản phẩm">
+                                            </div>
+                                        </div>
+
+                                        <div class="admin-upload-row">
+                                            <button id="product-image-ai-enhance" class="btn btn-outline btn-sm" type="button" disabled>
+                                                <span class="icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 24 24"><path d="m12 3 2.2 4.6L19 10l-4.8 2.4L12 17l-2.2-4.6L5 10l4.8-2.4L12 3Z"></path><path d="M19 3v4"></path><path d="M21 5h-4"></path></svg>
+                                                </span>
+                                                AI làm đẹp ảnh
+                                            </button>
+                                            <button id="product-image-ai-accept" class="btn btn-solid btn-sm" type="button" disabled>Chấp nhận</button>
+                                            <button id="product-image-ai-cancel" class="btn btn-danger btn-sm" type="button" disabled>Hủy</button>
+                                        </div>
+                                    </div>
+                                    <div id="product-ai-workspace" class="admin-ai-pipeline">
+                                        <div class="admin-ai-box">
+                                            <div class="admin-ai-box-label-row">
+                                                <div class="admin-ai-box-label">Ảnh trước khi sửa</div>
+                                                <span class="admin-ai-box-badge admin-ai-box-badge-input">Input</span>
+                                            </div>
+                                            <div class="admin-ai-box-frame">
+                                                <img id="product-ai-source-preview" class="admin-ai-box-image" alt="Ảnh đầu vào" hidden>
+                                                <span id="product-ai-source-empty" class="admin-ai-box-empty">Chưa chọn ảnh</span>
+                                            </div>
+                                        </div>
+                                        <div class="admin-ai-pipeline-arrow" aria-hidden="true"><span>&rarr;</span></div>
+                                        <div class="admin-ai-box">
+                                            <div class="admin-ai-box-label-row">
+                                                <div class="admin-ai-box-label">Kết quả sau chỉnh sửa</div>
+                                                <span class="admin-ai-box-badge admin-ai-box-badge-output">AI Output</span>
+                                            </div>
+                                            <div class="admin-ai-box-frame">
+                                                <img id="product-ai-result-preview" class="admin-ai-box-image" alt="" hidden>
+                                                <span id="product-ai-result-empty" class="admin-ai-box-empty" hidden></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="product-gallery-preview" class="admin-gallery-preview-grid"></div>
+
+                                </div>
+
+                                <div class="admin-form-grid">
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-cpu">CPU</label>
+                                        <input id="product-cpu" class="input" placeholder="VD: Apple A18 Pro / Intel Core i7">
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-ram">RAM</label>
+                                        <input id="product-ram" class="input" placeholder="VD: 8GB / 16GB">
+                                    </div>
+                                </div>
+
+                                <div class="admin-form-grid">
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-storage">Bộ nhớ (ROM/SSD)</label>
+                                        <input id="product-storage" class="input" placeholder="VD: 256GB / 1TB SSD">
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-gpu">Card đồ họa</label>
+                                        <input id="product-gpu" class="input" placeholder="VD: RTX 4060 / Apple GPU">
+                                    </div>
+                                </div>
+
+                                <div class="admin-form-grid">
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-screen">Màn hình</label>
+                                        <input id="product-screen" class="input" placeholder="VD: 6.7 inch OLED 120Hz">
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-battery">Pin</label>
+                                        <input id="product-battery" class="input" placeholder="VD: 5000mAh / 18 giờ">
+                                    </div>
+                                </div>
+
+                                <div class="admin-form-grid">
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-camera">Camera</label>
+                                        <input id="product-camera" class="input" placeholder="VD: 50MP + 12MP">
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="product-operating-system">Hệ điều hành</label>
+                                        <input id="product-operating-system" class="input" placeholder="VD: Android 15 / iOS / Windows 11">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="product-quick-specs">Thông số nhanh (tự động từ thông số mặc định)</label>
+                                    <textarea id="product-quick-specs" class="textarea" rows="4" placeholder="Tự động sinh từ CPU/RAM/Bộ nhớ/Card đồ họa/Màn hình/Pin..." readonly></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="product-detail-specs">Thông số chi tiết (trang chi tiết sản phẩm)</label>
+                                    <div id="product-detail-specs-editor" class="admin-spec-editor"></div>
+                                    <textarea id="product-detail-specs" class="textarea" rows="8" placeholder="Mỗi dòng theo định dạng: Tên thông số: Giá trị" hidden></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="product-variants">Biến thể sản phẩm</label>
+                                    <textarea id="product-variants" class="textarea" rows="6" placeholder="Mỗi dòng: Tên biến thể | Giá | Tồn kho | Ảnh (tùy chọn) | SKU (tùy chọn)"></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="product-description">Mô tả</label>
+                                    <textarea id="product-description" class="textarea" rows="4" placeholder="Thông số, bảo hành, quà tặng..."></textarea>
+                                </div>
+
+                                <div class="admin-form-actions">
+                                    <button id="product-save" class="btn btn-primary" type="submit">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"></path></svg>
+                                        </span>
+                                        Lưu thay đổi
+                                    </button>
+                                    <button id="product-cancel" class="btn btn-outline" type="button">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>
+                                        </span>
+                                        Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="products-msg" class="message" style="margin-top:12px; display:none;"></div>
+                </section>
+            </section>
+
+            <!-- View: quản lý danh mục -->
+            <section id="view-categories" class="admin-view" hidden>
+                <div class="view-head">
+                    <h2>Quản lý danh mục</h2>
+                </div>
+
+                <section class="panel">
+                    <div class="panel-head panel-head-stack">
+                        <div>
+                            <h3 style="margin:0;">Danh sách danh mục</h3>
+                        </div>
+
+                        <div class="admin-toolbar">
+                            <label class="admin-search" for="categories-search">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                                </span>
+                                <input id="categories-search" class="input admin-search-input" placeholder="Tìm theo tên hoặc mô tả...">
+                            </label>
+                            <select id="categories-sort-id" class="select admin-sort-select" aria-label="Sắp xếp danh mục theo ID">
+                                <option value="asc" selected>ID tăng dần</option>
+                                <option value="desc">ID giảm dần</option>
+                            </select>
+                            <button class="btn btn-sm admin-btn-create" type="button" id="categories-create">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                </span>
+                                Thêm mới
+                            </button>
+                            <button class="btn btn-outline btn-sm admin-btn-refresh" type="button" id="categories-refresh">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2.3 5.6"></path><path d="M20 4v7h-7"></path></svg>
+                                </span>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="admin-content-switch" id="categories-content">
+                        <div id="categories-list-panel" class="admin-list-panel">
+                            <div class="table-wrap">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên</th>
+                                        <th>Mô tả</th>
+                                        <th class="col-center">Thao tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="categories-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="categories-edit-panel" class="admin-edit-panel" hidden>
+                            <div class="edit-panel-head">
+                                <h4 id="category-form-mode">Tạo mới danh mục</h4>
+                                <button id="category-back-list" class="btn btn-outline btn-sm admin-btn-back" type="button">
+                                    <span class="icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path><path d="M9 12h11"></path></svg>
+                                    </span>
+                                    Quay lại danh sách
+                                </button>
+                            </div>
+
+                            <form id="category-form">
+                                <input id="category-id" type="hidden">
+
+                                <div class="form-row">
+                                    <label class="field-label" for="category-name">Tên danh mục</label>
+                                    <input id="category-name" class="input" required>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="category-description">Mô tả</label>
+                                    <textarea id="category-description" class="textarea" rows="4"></textarea>
+                                </div>
+
+                                <div class="admin-form-actions">
+                                    <button id="category-save" class="btn btn-primary" type="submit">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"></path></svg>
+                                        </span>
+                                        Lưu thay đổi
+                                    </button>
+                                    <button id="category-cancel" class="btn btn-outline" type="button">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>
+                                        </span>
+                                        Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="categories-msg" class="message" style="margin-top:12px; display:none;"></div>
+                </section>
+            </section>
+
+            <!-- View: quản lý khuyến mãi -->
+            <section id="view-promotions" class="admin-view" hidden>
+                <div class="view-head">
+                    <h2>Quản lý khuyến mãi</h2>
+                </div>
+
+                <section class="panel">
+                    <div class="panel-head panel-head-stack">
+                        <div>
+                            <h3 style="margin:0;">Danh sách khuyến mãi</h3>
+                        </div>
+
+                        <div class="admin-toolbar">
+                            <label class="admin-search" for="promotions-search">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                                </span>
+                                <input id="promotions-search" class="input admin-search-input" placeholder="Tìm theo code, trạng thái hoặc ngày...">
+                            </label>
+                            <select id="promotions-sort-id" class="select admin-sort-select" aria-label="Sắp xếp khuyến mãi theo ID">
+                                <option value="asc" selected>ID tăng dần</option>
+                                <option value="desc">ID giảm dần</option>
+                            </select>
+                            <button class="btn btn-sm admin-btn-create" type="button" id="promotions-create">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                </span>
+                                Thêm mới
+                            </button>
+                            <button class="btn btn-outline btn-sm admin-btn-refresh" type="button" id="promotions-refresh">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2.3 5.6"></path><path d="M20 4v7h-7"></path></svg>
+                                </span>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="admin-content-switch" id="promotions-content">
+                        <div id="promotions-list-panel" class="admin-list-panel">
+                            <div class="table-wrap">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Code</th>
+                                        <th class="col-center">% giảm</th>
+                                        <th>Thời gian</th>
+                                        <th class="col-center">Trạng thái</th>
+                                        <th class="col-center">Thao tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="promotions-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="promotions-edit-panel" class="admin-edit-panel" hidden>
+                            <div class="edit-panel-head">
+                                <h4 id="promotion-form-mode">Tạo mới khuyến mãi</h4>
+                                <button id="promotion-back-list" class="btn btn-outline btn-sm admin-btn-back" type="button">
+                                    <span class="icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path><path d="M9 12h11"></path></svg>
+                                    </span>
+                                    Quay lại danh sách
+                                </button>
+                            </div>
+
+                            <form id="promotion-form">
+                                <input id="promotion-id" type="hidden">
+
+                                <div class="form-row">
+                                    <label class="field-label" for="promotion-code">Mã khuyến mãi</label>
+                                    <input id="promotion-code" class="input" placeholder="VD: SALE10" required>
+                                </div>
+
+                                <div class="admin-form-grid">
+                                    <div class="form-row">
+                                        <label class="field-label" for="promotion-discount">% giảm</label>
+                                        <input id="promotion-discount" class="input" type="number" min="1" max="100" step="1" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="promotion-active">Kích hoạt</label>
+                                        <label class="switch">
+                                            <input id="promotion-active" type="checkbox" checked>
+                                            <span class="switch-ui"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="admin-form-grid">
+                                    <div class="form-row">
+                                        <label class="field-label" for="promotion-start">Ngày bắt đầu</label>
+                                        <input id="promotion-start" class="input" type="date" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="field-label" for="promotion-end">Ngày kết thúc</label>
+                                        <input id="promotion-end" class="input" type="date" required>
+                                    </div>
+                                </div>
+
+                                <div class="admin-form-actions">
+                                    <button id="promotion-save" class="btn btn-primary" type="submit">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"></path></svg>
+                                        </span>
+                                        Lưu thay đổi
+                                    </button>
+                                    <button id="promotion-cancel" class="btn btn-outline" type="button">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>
+                                        </span>
+                                        Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="promotions-msg" class="message" style="margin-top:12px; display:none;"></div>
+                </section>
+            </section>
+
+            <section id="view-banners" class="admin-view" hidden>
+                <div class="view-head">
+                    <h2>Quản lý banner</h2>
+                </div>
+
+                <section class="panel">
+                    <div class="panel-head panel-head-stack">
+                        <div>
+                            <h3 style="margin:0;">Danh sách banner trang chủ</h3>
+                        </div>
+
+                        <div class="admin-toolbar">
+                            <button class="btn btn-sm admin-btn-create" type="button" id="banners-create-toggle">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                </span>
+                                Thêm banner
+                            </button>
+                            <button class="btn btn-outline btn-sm admin-btn-refresh" type="button" id="banners-refresh">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2.3 5.6"></path><path d="M20 4v7h-7"></path></svg>
+                                </span>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="admin-content-switch" id="banners-content">
+                        <div id="banners-list-panel" class="admin-list-panel">
+                            <div class="table-wrap">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th class="col-center">Ảnh</th>
+                                        <th>URL ảnh</th>
+                                        <th>Mô tả</th>
+                                        <th>Liên kết</th>
+                                        <th class="col-center">Thao tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="banners-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="banners-edit-panel" class="admin-edit-panel" hidden>
+                            <div class="edit-panel-head">
+                                <h4 id="banners-form-mode" class="banners-form-mode">Thêm banner mới</h4>
+                                <button id="banner-back-list" class="btn btn-outline btn-sm admin-btn-back" type="button">
+                                    <span class="icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path><path d="M9 12h11"></path></svg>
+                                    </span>
+                                    Quay lại danh sách
+                                </button>
+                            </div>
+
+                            <form id="banner-form">
+                                <input id="banners-id" type="hidden">
+
+                                <div class="form-row">
+                                    <label class="field-label" for="banners-image-url">URL ảnh banner</label>
+                                    <input id="banners-image-url" class="input" placeholder="URL ảnh banner (bắt buộc)" required>
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="banners-target-url">Liên kết khi bấm banner</label>
+                                    <input id="banners-target-url" class="input" placeholder="Liên kết khi bấm banner (tùy chọn)">
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="field-label" for="banners-alt-text">Mô tả ảnh (ALT)</label>
+                                    <input id="banners-alt-text" class="input" placeholder="Mô tả ảnh (tùy chọn)">
+                                </div>
+
+                                <div class="admin-form-actions">
+                                    <button id="banners-save" class="btn btn-primary" type="submit">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"></path></svg>
+                                        </span>
+                                        <span id="banners-submit-text">Lưu thay đổi</span>
+                                    </button>
+                                    <button id="banner-cancel" class="btn btn-outline" type="button">
+                                        <span class="icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>
+                                        </span>
+                                        Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="banners-msg" class="message" style="margin-top:12px; display:none;"></div>
+                </section>
+            </section>
+
+            <!-- View: quản lý tài khoản -->
+            <section id="view-messages" class="admin-view" hidden>
+                <div class="view-head">
+                    <h2>Tin nhắn khách hàng</h2>
+                </div>
+
+                <section class="panel">
+                    <div class="panel-head panel-head-stack">
+                        <div>
+                            <h3 style="margin:0;">Hỗ trợ chat</h3>
+                        </div>
+
+                        <div class="admin-toolbar">
+                            <label class="admin-search" for="messages-search">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                                </span>
+                                <input id="messages-search" class="input admin-search-input" placeholder="Tìm theo tên khách, email hoặc nội dung gần nhất...">
+                            </label>
+                            <button class="btn btn-outline btn-sm admin-btn-refresh" type="button" id="messages-refresh">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2.3 5.6"></path><path d="M20 4v7h-7"></path></svg>
+                                </span>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="admin-messages-layout">
+                        <aside class="admin-messages-list-col">
+                            <div class="admin-messages-list-head">
+                                <strong>Hội thoại</strong>
+                                <span id="messages-unread-total" class="muted">0 chưa đọc</span>
+                            </div>
+                            <div id="messages-conversations" class="admin-messages-conversations"></div>
+                        </aside>
+
+                        <div class="admin-messages-thread-col">
+                            <div class="admin-messages-thread-head">
+                                <div>
+                                    <strong id="messages-customer-title">Chưa chọn hội thoại</strong>
+                                    <div id="messages-customer-email" class="muted"></div>
+                                </div>
+                            </div>
+
+                            <div id="messages-thread" class="admin-messages-thread"></div>
+
+                            <form id="messages-reply-form" class="admin-messages-reply-form">
+                                <textarea
+                                        id="messages-reply-input"
+                                        class="textarea"
+                                        rows="3"
+                                        maxlength="4000"
+                                        placeholder="Nhập tin nhắn phản hồi..."
+                                        required
+                                ></textarea>
+                                <button class="btn btn-primary" type="submit" id="messages-reply-submit">Gửi phản hồi</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="messages-msg" class="message" style="margin-top:12px; display:none;"></div>
+                </section>
+            </section>
+
+            <section id="view-users" class="admin-view" hidden>
+                <div class="view-head">
+                    <h2>Quản lý tài khoản</h2>
+                </div>
+
+                <section class="panel">
+                    <div class="panel-head panel-head-stack">
+                        <div>
+                            <h3 style="margin:0;">Danh sách tài khoản</h3>
+                        </div>
+
+                        <div class="admin-toolbar">
+                            <label class="admin-search" for="users-search">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                                </span>
+                                <input id="users-search" class="input admin-search-input" placeholder="Tìm theo tên, email, role...">
+                            </label>
+                            <select id="users-sort-id" class="select admin-sort-select" aria-label="Sắp xếp tài khoản theo ID">
+                                <option value="asc" selected>ID tăng dần</option>
+                                <option value="desc">ID giảm dần</option>
+                            </select>
+                            <button class="btn btn-sm admin-btn-create" type="button" id="users-create-toggle">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                </span>
+                                Thêm tài khoản
+                            </button>
+                            <button class="btn btn-outline btn-sm admin-btn-refresh" type="button" id="users-refresh">
+                                <span class="icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2.3 5.6"></path><path d="M20 4v7h-7"></path></svg>
+                                </span>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="users-create-panel" class="admin-inline-create" hidden>
+                        <h4 style="margin:0 0 10px;">Tạo tài khoản mới</h4>
+                        <form id="users-create-form">
+                            <div class="admin-form-grid">
+                                <div class="form-row">
+                                    <label class="field-label" for="users-create-username">Tên đăng nhập</label>
+                                    <input id="users-create-username" class="input" minlength="3" maxlength="40" required
+                                           data-required-message="Vui l&#242;ng nh&#7853;p t&#234;n &#273;&#259;ng nh&#7853;p.">
+                                </div>
+                                <div class="form-row">
+                                    <label class="field-label" for="users-create-email">Email</label>
+                                    <input id="users-create-email" class="input" type="email" maxlength="120" required
+                                           data-required-message="Vui l&#242;ng nh&#7853;p email.">
+                                </div>
+                            </div>
+
+                            <div class="admin-form-grid">
+                                <div class="form-row">
+                                    <label class="field-label" for="users-create-password">Mật khẩu</label>
+                                    <div class="password-wrap">
+                                        <div class="input-with-icon" style="flex:1;">
+                                            <span class="icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                                    <path d="M6 11h12v10H6z"></path>
+                                                </svg>
+                                            </span>
+                                            <input id="users-create-password" class="input" type="password" minlength="6" maxlength="100" autocomplete="new-password" required
+                                                   data-required-message="Vui l&#242;ng nh&#7853;p m&#7853;t kh&#7849;u.">
+                                        </div>
+                                        <button class="btn btn-outline btn-icon" type="button"
+                                                data-password-target="users-create-password"
+                                                data-label-show="Hi&#7875;n th&#7883; m&#7853;t kh&#7849;u"
+                                                data-label-hide="&#7848;n m&#7853;t kh&#7849;u"
+                                                aria-label="Hi&#7875;n th&#7883; m&#7853;t kh&#7849;u">
+                                            <span class="icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-row" style="grid-column: 1 / 2;">
+                                    <label class="field-label" for="users-create-password-confirm">X&#225;c nh&#7853;n m&#7853;t kh&#7849;u</label>
+                                    <div class="password-wrap">
+                                        <div class="input-with-icon" style="flex:1;">
+                                            <span class="icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                                    <path d="M6 11h12v10H6z"></path>
+                                                </svg>
+                                            </span>
+                                            <input id="users-create-password-confirm" class="input" type="password" minlength="6" maxlength="100" autocomplete="new-password" required
+                                                   data-required-message="Vui l&#242;ng x&#225;c nh&#7853;n m&#7853;t kh&#7849;u.">
+                                        </div>
+                                        <button class="btn btn-outline btn-icon" type="button"
+                                                data-password-target="users-create-password-confirm"
+                                                data-label-show="Hi&#7875;n th&#7883; x&#225;c nh&#7853;n m&#7853;t kh&#7849;u"
+                                                data-label-hide="&#7848;n x&#225;c nh&#7853;n m&#7853;t kh&#7849;u"
+                                                aria-label="Hi&#7875;n th&#7883; x&#225;c nh&#7853;n m&#7853;t kh&#7849;u">
+                                            <span class="icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <label class="field-label" for="users-create-role">Role</label>
+                                    <select id="users-create-role" class="select">
+                                        <option value="CUSTOMER" selected>CUSTOMER</option>
+                                        <option value="ADMIN">ADMIN</option>
+                                    </select>
+                                    <small id="users-create-role-hint" class="muted">ADMIN chỉ dành cho SUPER_ADMIN.</small>
+                                </div>
+                            </div>
+
+                            <div class="admin-form-grid">
+                                <div class="form-row">
+                                    <label class="field-label" for="users-create-full-name">Họ và tên</label>
+                                    <input id="users-create-full-name" class="input" maxlength="120" required
+                                           data-required-message="Vui l&#242;ng nh&#7853;p h&#7885; v&#224; t&#234;n.">
+                                </div>
+                                <div class="form-row">
+                                    <label class="field-label" for="users-create-phone">Số điện thoại</label>
+                                    <input id="users-create-phone" class="input" maxlength="20">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <label class="field-label" for="users-create-address">Địa chỉ</label>
+                                <input id="users-create-address" class="input" maxlength="255">
+                            </div>
+
+                            <div class="admin-form-actions">
+                                <button id="users-create-submit" class="btn btn-primary" type="submit">
+                                    <span class="icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"></path></svg>
+                                    </span>
+                                    Tạo tài khoản
+                                </button>
+                                <button id="users-create-cancel" class="btn btn-outline" type="button">
+                                    <span class="icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>
+                                    </span>
+                                    Hủy
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ và tên</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th class="col-center">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody id="users-body"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- tac dung code: phan trang server-side cho danh sach tai khoan admin. -->
+                    <div class="admin-pagination" id="users-pagination">
+                        <button id="users-page-prev" class="btn btn-outline btn-sm" type="button">← Trước</button>
+                        <div id="users-page-info" class="admin-pagination-info">Trang 1/1 • 0 bản ghi</div>
+                        <button id="users-page-next" class="btn btn-outline btn-sm" type="button">Sau →</button>
+                    </div>
+
+                    <div id="users-msg" class="message" style="margin-top:12px; display:none;"></div>
+                </section>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div id="admin-image-lightbox" class="admin-image-lightbox" aria-hidden="true">
+    <div class="admin-image-lightbox-backdrop" data-lightbox-close="1"></div>
+    <div class="admin-image-lightbox-card" role="dialog" aria-modal="true" aria-label="Xem ảnh phóng to">
+        <button id="admin-image-lightbox-close" class="icon-btn admin-image-lightbox-close" type="button" aria-label="Đóng">×</button>
+        <img id="admin-image-lightbox-img" class="admin-image-lightbox-img" alt="Ảnh phóng to">
+    </div>
+</div>
+
+<!-- Modal xem chi tiết đơn hàng -->
+<div id="order-modal" class="modal" aria-hidden="true">
+    <div class="modal-overlay" data-close="1"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+        <div class="modal-head">
+            <h3 id="order-modal-title" style="margin:0;">Chi tiết đơn</h3>
+            <button class="icon-btn" type="button" onclick="AdminUI.closeOrderModal()" aria-label="Đóng">×</button>
+        </div>
+        <div class="modal-body" id="order-modal-body"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script th:src="@{/js/ui.js(v='20260408b')}" src="/js/ui.js?v=20260408b"></script>
+<script th:src="@{/js/admin.js(v='20260425a')}" src="/js/admin.js?v=20260425a"></script>
+</body>
+</html>

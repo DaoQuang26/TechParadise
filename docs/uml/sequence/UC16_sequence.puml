@@ -1,0 +1,48 @@
+@startuml UC16_sequence
+title UC16 - Quan ly banner (Admin)
+actor "Admin" as Admin
+boundary "AdminBannerPage" as AdminBannerPage
+control "HomeBannerController" as HomeBannerController
+control "HomeBannerService" as HomeBannerService
+control "AdminAuditLogService" as AuditService
+database "HomeBannerRepository / home_banners" as BannerRepo
+database "AdminAuditLogRepository /\nadmin_audit_logs" as AuditRepo
+
+Admin -> AdminBannerPage : Mo trang Banner trang chu
+AdminBannerPage -> HomeBannerController : GET /api/admin/banners/home
+HomeBannerController -> HomeBannerService : findAdminHomeBanners()
+HomeBannerService -> BannerRepo : findAllByOrderByIdAsc()
+BannerRepo --> HomeBannerService : List<HomeBanner>
+HomeBannerService --> HomeBannerController : List<HomeBanner>
+HomeBannerController --> AdminBannerPage : Hien thi danh sach banner
+
+alt Bam nut Them banner
+  Admin -> AdminBannerPage : Nhap imageUrl, targetUrl, altText
+  Admin -> AdminBannerPage : Bam Luu
+  AdminBannerPage -> HomeBannerController : POST /api/admin/banners/home
+  HomeBannerController -> HomeBannerService : create(request)
+  HomeBannerService -> BannerRepo : save(HomeBanner)
+  HomeBannerController -> AuditService : logAction(BANNER_CREATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  HomeBannerController --> AdminBannerPage : 201 Created
+else Bam nut Xoa banner
+  Admin -> AdminBannerPage : Bam Xoa
+  AdminBannerPage -> HomeBannerController : DELETE /api/admin/banners/home/{id}
+  HomeBannerController -> HomeBannerService : delete(id)
+  HomeBannerService -> BannerRepo : existsById(id)
+  HomeBannerService -> BannerRepo : deleteById(id)
+  HomeBannerController -> AuditService : logAction(BANNER_DELETE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  HomeBannerController --> AdminBannerPage : 204 No Content
+end
+
+alt Du lieu banner khong hop le / banner khong ton tai
+  HomeBannerService --> HomeBannerController : IllegalArgumentException
+  HomeBannerController --> AdminBannerPage : 400 + thong bao loi
+  AdminBannerPage --> Admin : Hien thi loi
+else Loi CSDL
+  BannerRepo --> HomeBannerService : DataAccessException
+  HomeBannerController --> AdminBannerPage : 500 Loi he thong
+  AdminBannerPage --> Admin : Hien thi Loi he thong
+end
+@enduml

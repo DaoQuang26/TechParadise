@@ -1,0 +1,43 @@
+@startuml UC10_analysis
+title UC10 - Danh gia san pham da mua - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ReviewDialog <<boundary>> {
+  +productId
+  +rating
+  +content
+  +clickSubmitReview()
+  +clickDeleteMyReview()
+}
+class CustomerProductReviewController <<control>> {
+  +upsertReview(productId,request)
+  +deleteMyReview(productId)
+}
+class ProductReviewService <<control>> {
+  +upsertMyReview(productId,username,request)
+  +deleteMyReview(productId,username)
+}
+class UserRepository <<control>>
+class ProductRepository <<control>>
+class OrderItemRepository <<control>>
+class ProductReviewRepository <<control>>
+class User <<entity>>
+class Product <<entity>>
+class OrderItem <<entity>>
+class ProductReview <<entity>> {
+  +productId
+  +userId
+  +rating
+  +content
+}
+class "product_reviews (table)" as ReviewTable <<entity>>
+
+ReviewDialog --> CustomerProductReviewController
+CustomerProductReviewController --> ProductReviewService
+ProductReviewService --> UserRepository
+ProductReviewService --> ProductRepository
+ProductReviewService --> OrderItemRepository
+ProductReviewService --> ProductReviewRepository
+ProductReviewRepository --> ProductReview
+ProductReview .. ReviewTable : ORM map
+@enduml

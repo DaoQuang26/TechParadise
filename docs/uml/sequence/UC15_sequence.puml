@@ -1,0 +1,59 @@
+@startuml UC15_sequence
+title UC15 - Quan ly khuyen mai (Admin)
+actor "Admin" as Admin
+boundary "AdminPromotionPage" as AdminPromotionPage
+control "PromotionController" as PromotionController
+control "PromotionService" as PromotionService
+control "AdminAuditLogService" as AuditService
+database "PromotionRepository / promotions" as PromotionRepo
+database "AdminAuditLogRepository /\nadmin_audit_logs" as AuditRepo
+
+Admin -> AdminPromotionPage : Mo trang Khuyen mai
+AdminPromotionPage -> PromotionController : GET /api/admin/promotions
+PromotionController -> PromotionService : findAll()
+PromotionService -> PromotionRepo : findAll()
+PromotionRepo --> PromotionService : List<Promotion>
+PromotionService --> PromotionController : List<Promotion>
+PromotionController --> AdminPromotionPage : Hien thi danh sach
+
+alt Bam nut Them khuyen mai
+  Admin -> AdminPromotionPage : Nhap code, discountPercent,\nstartDate, endDate, active
+  Admin -> AdminPromotionPage : Bam Luu
+  AdminPromotionPage -> PromotionController : POST /api/admin/promotions
+  PromotionController -> PromotionService : create(promotion)
+  PromotionService -> PromotionRepo : existsByCodeIgnoreCase(code)
+  PromotionService -> PromotionRepo : save(promotion)
+  PromotionController -> AuditService : logAction(PROMOTION_CREATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  PromotionController --> AdminPromotionPage : 201 Created
+else Bam nut Sua khuyen mai
+  Admin -> AdminPromotionPage : Sua thong tin + Bam Cap nhat
+  AdminPromotionPage -> PromotionController : PUT /api/admin/promotions/{id}
+  PromotionController -> PromotionService : update(id,promotion)
+  PromotionService -> PromotionRepo : findById(id)
+  PromotionService -> PromotionRepo : existsByCodeIgnoreCaseAndIdNot()
+  PromotionService -> PromotionRepo : save(promotion)
+  PromotionController -> AuditService : logAction(PROMOTION_UPDATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  PromotionController --> AdminPromotionPage : 200 Updated
+else Bam nut Xoa khuyen mai
+  Admin -> AdminPromotionPage : Bam Xoa
+  AdminPromotionPage -> PromotionController : DELETE /api/admin/promotions/{id}
+  PromotionController -> PromotionService : delete(id)
+  PromotionService -> PromotionRepo : existsById(id)
+  PromotionService -> PromotionRepo : deleteById(id)
+  PromotionController -> AuditService : logAction(PROMOTION_DELETE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  PromotionController --> AdminPromotionPage : 204 No Content
+end
+
+alt Ma trung / ngay khong hop le / phan tram giam khong hop le
+  PromotionService --> PromotionController : IllegalArgumentException
+  PromotionController --> AdminPromotionPage : 400 + thong bao loi
+  AdminPromotionPage --> Admin : Hien thi loi
+else Loi CSDL
+  PromotionRepo --> PromotionService : DataAccessException
+  PromotionController --> AdminPromotionPage : 500 Loi he thong
+  AdminPromotionPage --> Admin : Hien thi Loi he thong
+end
+@enduml

@@ -1,0 +1,74 @@
+@startuml UC14_sequence
+title UC14 - Quan ly tai khoan (Admin/Super Admin)
+actor "Admin" as Admin
+actor "Super Admin" as SuperAdmin
+boundary "AdminUserPage" as AdminUserPage
+control "UserManagementController" as UserManagementController
+control "UserManagementService" as UserManagementService
+control "AdminAuditLogService" as AuditService
+database "UserRepository / users" as UserRepo
+database "OrderRepository / orders" as OrderRepo
+database "CartItemRepository / cart_items" as CartItemRepo
+database "AdminAuditLogRepository /\nadmin_audit_logs" as AuditRepo
+
+Admin -> AdminUserPage : Mo trang Quan ly tai khoan
+AdminUserPage -> UserManagementController : GET /api/admin/users/paged
+UserManagementController -> UserManagementService : findUsersPaged(...)
+UserManagementService -> UserRepo : searchAdminUsers(...)
+UserRepo --> UserManagementService : Page<User>
+UserManagementService --> UserManagementController : Page<User>
+UserManagementController --> AdminUserPage : Hien thi danh sach user
+
+alt Admin bam nut Them tai khoan
+  Admin -> AdminUserPage : Nhap fullName, username, email,\npassword, role + Bam Luu
+  AdminUserPage -> UserManagementController : POST /api/admin/users
+  UserManagementController -> UserManagementService : createUser(request, canCreateAdminRole)
+  UserManagementService -> UserRepo : existsByUsernameIgnoreCase()
+  UserManagementService -> UserRepo : existsByEmailIgnoreCase()
+  UserManagementService -> UserRepo : save(User)
+  UserManagementController -> AuditService : logAction(USER_CREATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  UserManagementController --> AdminUserPage : 201 Created
+else Admin bam nut Sua thong tin tai khoan
+  Admin -> AdminUserPage : Sua thong tin + Bam Cap nhat
+  AdminUserPage -> UserManagementController : PUT /api/admin/users/{id}
+  UserManagementController -> UserManagementService : updateUserInfo(id,request)
+  UserManagementService -> UserRepo : findById(id)
+  UserManagementService -> UserRepo : findByUsernameIgnoreCase()
+  UserManagementService -> UserRepo : findByEmailIgnoreCase()
+  UserManagementService -> UserRepo : save(User)
+  UserManagementController -> AuditService : logAction(USER_UPDATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  UserManagementController --> AdminUserPage : 200 Updated
+else Admin bam nut Xoa customer
+  Admin -> AdminUserPage : Bam Xoa
+  AdminUserPage -> UserManagementController : DELETE /api/admin/users/{id}
+  UserManagementController -> UserManagementService : deleteCustomer(id)
+  UserManagementService -> UserRepo : findById(id)
+  UserManagementService -> OrderRepo : countByUserId(id)
+  UserManagementService -> CartItemRepo : deleteByUserId(id)
+  UserManagementService -> UserRepo : deleteById(id)
+  UserManagementController -> AuditService : logAction(USER_DELETE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  UserManagementController --> AdminUserPage : 204 No Content
+end
+
+SuperAdmin -> AdminUserPage : Bam nut Doi role user
+AdminUserPage -> UserManagementController : PUT /api/super-admin/users/{id}/role
+UserManagementController -> UserManagementService : updateRole(id,role)
+UserManagementService -> UserRepo : findById(id)
+UserManagementService -> UserRepo : save(role moi)
+UserManagementController -> AuditService : logAction(USER_ROLE_UPDATE)
+AuditService -> AuditRepo : save(admin_audit_logs)
+UserManagementController --> AdminUserPage : User sau khi doi role
+
+alt Trung username/email / khong du quyen /\nco gang tao-gan SUPER_ADMIN / user da co don
+  UserManagementService --> UserManagementController : IllegalArgumentException
+  UserManagementController --> AdminUserPage : 400 + thong bao loi
+  AdminUserPage --> Admin : Hien thi loi
+else Loi CSDL
+  UserRepo --> UserManagementService : DataAccessException
+  UserManagementController --> AdminUserPage : 500 Loi he thong
+  AdminUserPage --> Admin : Hien thi Loi he thong
+end
+@enduml

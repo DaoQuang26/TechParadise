@@ -1,0 +1,57 @@
+@startuml UC13_analysis
+title UC13 - Quan ly don hang (Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminOrderPage <<boundary>> {
+  +orderFilters
+  +statusAction
+  +clickViewOrder()
+  +clickUpdateStatus()
+  +clickDeleteOrder()
+}
+class AdminOrderController <<control>> {
+  +findAllPaged(...)
+  +detail(id)
+  +updateStatus(id,request)
+  +deleteOrder(id)
+}
+class OrderService <<control>> {
+  +findAllSummariesPaged(...)
+  +getOrderDetailForAdmin(id)
+  +updateStatusSummary(id,status,actor)
+  +deleteOrderByAdmin(id,actor)
+}
+class OrderStatusHistoryService <<control>> {
+  +saveHistorySafe(...)
+}
+class AdminAuditLogService <<control>> {
+  +logAction(...)
+}
+class OrderRepository <<control>>
+class OrderStatusHistoryRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class Order <<entity>>
+class OrderItem <<entity>>
+class OrderStatusHistory <<entity>>
+class AdminAuditLog <<entity>>
+class "orders (table)" as OrdersTable <<entity>>
+class "order_items (table)" as OrderItemsTable <<entity>>
+class "order_status_history (table)" as HistoryTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminOrderPage --> AdminOrderController
+AdminOrderController --> OrderService
+AdminOrderController --> AdminAuditLogService
+OrderService --> OrderStatusHistoryService
+OrderService --> OrderRepository
+OrderService --> OrderStatusHistoryRepository
+AdminAuditLogService --> AdminAuditLogRepository
+OrderRepository --> Order
+OrderRepository --> OrderItem
+OrderStatusHistoryRepository --> OrderStatusHistory
+AdminAuditLogRepository --> AdminAuditLog
+Order .. OrdersTable : ORM map
+OrderItem .. OrderItemsTable : ORM map
+OrderStatusHistory .. HistoryTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml

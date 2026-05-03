@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đơn hàng - TechParadise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}" href="/css/main.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="logo" href="/">
+            <span class="logo-mark">TP</span>
+            <span class="logo-text">TechParadise</span>
+        </a>
+
+        <div class="header-search">
+            <input id="search" class="search-input" placeholder="Bạn cần tìm gì?">
+            <button class="btn btn-solid" type="button" onclick="TechStore.searchFromHeader()">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/></svg>
+                </span>
+                Tìm
+            </button>
+        </div>
+
+        <nav class="header-actions">
+            <a class="action" href="/cart" onclick="return TechStore.goCart(event)">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6h15l-2 10H7L6 6Z"/>
+                        <path d="M6 6 5 3H2"/>
+                        <circle cx="9" cy="20" r="1"/>
+                        <circle cx="18" cy="20" r="1"/>
+                    </svg>
+                </span>
+                <span class="action-label">Giỏ hàng</span>
+                <span id="cart-badge" class="badge">0</span>
+            </a>
+
+            <a id="orders-link" class="action" href="/orders" style="display:none;">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 6h12"/>
+                        <path d="M8 12h12"/>
+                        <path d="M8 18h12"/>
+                        <path d="M4 6h.01"/>
+                        <path d="M4 12h.01"/>
+                        <path d="M4 18h.01"/>
+                    </svg>
+                </span>
+                <span class="action-label">Đơn hàng</span>
+            </a>
+
+            <a id="admin-link" class="action" href="/admin/dashboard" style="display:none;">Quản trị</a>
+
+            <a id="login-link" class="action" href="/login">
+                <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                </span>
+                <span class="action-label" data-login-label>Đăng nhập</span>
+            </a>
+            <a id="register-link" class="action action-cta" href="/register">Đăng ký</a>
+            <button id="logout-btn" class="action action-ghost" type="button" style="display:none;" onclick="TechStore.logout()">Đăng xuất</button>
+        </nav>
+    </div>
+</header>
+
+<main class="container page">
+    <div class="page-head" style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h1 style="margin:0;" id="order-title">Chi tiết đơn</h1>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn btn-outline" href="/orders">← Danh sách đơn</a>
+            <button id="cancel-order-btn" class="btn btn-danger" type="button" style="display:none;">Gửi yêu cầu hủy</button>
+        </div>
+    </div>
+
+    <section id="order-detail-holder">
+        <!-- Render bằng JS -->
+    </section>
+</main>
+
+<div th:replace="~{fragments/site_footer :: storefrontFooter}"></div>
+
+<script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script th:src="@{/js/site.js}" src="/js/site.js"></script>
+<script th:src="@{/js/order_detail.js}" src="/js/order_detail.js"></script>
+</body>
+</html>

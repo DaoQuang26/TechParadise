@@ -1,0 +1,59 @@
+@startuml UC06_analysis
+title UC06 - Xem chi tiet san pham - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ProductDetailPage <<boundary>> {
+  +productId
+  +loadProductInfo()
+  +loadVariants()
+  +loadReviews()
+  +loadReviewSummary()
+}
+class ProductController <<control>> {
+  +getProductById(id)
+  +getProductVariants(id)
+  +getProductReviews(id,user)
+  +getReviewSummary(id,user)
+}
+class ProductService <<control>> {
+  +getProductById(id)
+}
+class ProductVariantService <<control>> {
+  +getByProductId(id)
+}
+class ProductReviewService <<control>> {
+  +getPublicReviews(productId,user)
+  +getReviewSummary(productId,user)
+}
+class ProductRepository <<control>> {
+  +findById(id)
+}
+class ProductVariantRepository <<control>> {
+  +findByProductIdOrderBySortOrderAscIdAsc()
+}
+class ProductReviewRepository <<control>> {
+  +findByProductIdOrderByCreatedAtDesc()
+  +countByProductId()
+  +averageRatingByProductId()
+}
+class Product <<entity>>
+class ProductVariant <<entity>>
+class ProductReview <<entity>>
+class "products (table)" as ProductsTable <<entity>>
+class "product_variants (table)" as VariantTable <<entity>>
+class "product_reviews (table)" as ReviewTable <<entity>>
+
+ProductDetailPage --> ProductController
+ProductController --> ProductService
+ProductController --> ProductVariantService
+ProductController --> ProductReviewService
+ProductService --> ProductRepository
+ProductVariantService --> ProductVariantRepository
+ProductReviewService --> ProductReviewRepository
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+ProductReviewRepository --> ProductReview
+Product .. ProductsTable : ORM map
+ProductVariant .. VariantTable : ORM map
+ProductReview .. ReviewTable : ORM map
+@enduml

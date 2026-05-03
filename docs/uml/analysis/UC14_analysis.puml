@@ -1,0 +1,58 @@
+@startuml UC14_analysis
+title UC14 - Quan ly tai khoan (Admin/Super Admin) - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminUserPage <<boundary>> {
+  +userForm
+  +roleSelector
+  +clickCreateUser()
+  +clickUpdateUser()
+  +clickDeleteCustomer()
+  +clickUpdateRole()
+}
+class UserManagementController <<control>> {
+  +allUsersPaged(...)
+  +createUser(request)
+  +updateUserInfo(id,request)
+  +deleteCustomer(id)
+  +updateRole(id,request)
+}
+class UserManagementService <<control>> {
+  +findUsersPaged(...)
+  +createUser(request,allowCreateAdminRole)
+  +updateUserInfo(id,request)
+  +deleteCustomer(id)
+  +updateRole(id,role)
+}
+class AdminAuditLogService <<control>> {
+  +logAction(...)
+}
+class UserRepository <<control>>
+class OrderRepository <<control>>
+class CartItemRepository <<control>>
+class AdminAuditLogRepository <<control>>
+class User <<entity>>
+class Order <<entity>>
+class CartItem <<entity>>
+class AdminAuditLog <<entity>>
+class "users (table)" as UsersTable <<entity>>
+class "orders (table)" as OrdersTable <<entity>>
+class "cart_items (table)" as CartTable <<entity>>
+class "admin_audit_logs (table)" as AuditTable <<entity>>
+
+AdminUserPage --> UserManagementController
+UserManagementController --> UserManagementService
+UserManagementController --> AdminAuditLogService
+UserManagementService --> UserRepository
+UserManagementService --> OrderRepository
+UserManagementService --> CartItemRepository
+AdminAuditLogService --> AdminAuditLogRepository
+UserRepository --> User
+OrderRepository --> Order
+CartItemRepository --> CartItem
+AdminAuditLogRepository --> AdminAuditLog
+User .. UsersTable : ORM map
+Order .. OrdersTable : ORM map
+CartItem .. CartTable : ORM map
+AdminAuditLog .. AuditTable : ORM map
+@enduml

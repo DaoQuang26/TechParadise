@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán online (Mock) - TechParadise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}" href="/css/main.css">
+</head>
+<body>
+<main class="container page">
+    <!-- tac dung code: giao dien mo phong cong thanh toan online de test webhook truoc khi tich hop gateway that. -->
+    <section class="card" style="max-width: 760px; margin: 28px auto;">
+        <div class="card-head">
+            <h2 style="margin:0;">Cổng thanh toán online (Mock Gateway)</h2>
+        </div>
+        <div class="card-body">
+            <div class="kv"><span class="muted">Mã tham chiếu</span><strong id="mock-pay-reference">-</strong></div>
+            <div class="kv"><span class="muted">Mã đơn</span><strong id="mock-pay-order-id">-</strong></div>
+            <div class="kv"><span class="muted">Khách hàng</span><strong id="mock-pay-customer">-</strong></div>
+            <div class="kv total"><span>Tổng tiền</span><strong id="mock-pay-total">0 đ</strong></div>
+            <div class="kv"><span class="muted">Trạng thái hiện tại</span><strong id="mock-pay-status">-</strong></div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                <button id="mock-pay-success" class="btn btn-buy" type="button">Thanh toán thành công</button>
+                <button id="mock-pay-failed" class="btn btn-danger" type="button">Thanh toán thất bại</button>
+                <a id="mock-pay-order-link" class="btn btn-outline" href="/orders">Về đơn hàng</a>
+            </div>
+
+            <div id="mock-pay-message" class="message" style="margin-top:12px;"></div>
+        </div>
+    </section>
+</main>
+
+<script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script th:src="@{/js/site.js}" src="/js/site.js"></script>
+<script th:src="@{/js/payment_mock.js}" src="/js/payment_mock.js"></script>
+</body>
+</html>

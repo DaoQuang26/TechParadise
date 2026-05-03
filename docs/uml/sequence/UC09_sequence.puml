@@ -1,0 +1,41 @@
+@startuml UC09_sequence
+title UC09 - Quan ly thong tin ca nhan
+actor "Khach hang" as Customer
+boundary "ProfilePage" as ProfilePage
+control "CustomerProfileController" as ProfileController
+control "ProfileService" as ProfileService
+control "PasswordEncoder" as PasswordEncoder
+database "UserRepository / users" as UserRepo
+
+Customer -> ProfilePage : Mo trang Tai khoan
+ProfilePage -> ProfileController : GET /api/customer/profile
+ProfileController -> ProfileService : getProfile(username)
+ProfileService -> UserRepo : findByUsername(username)
+UserRepo --> ProfileService : User
+ProfileService --> ProfileController : ProfileResponse
+ProfileController --> ProfilePage : Hien thi thong tin hien tai
+
+Customer -> ProfilePage : Sua fullName/email/phone/address
+Customer -> ProfilePage : (Tuy chon) nhap currentPassword + newPassword
+Customer -> ProfilePage : Bam nut Luu thay doi
+ProfilePage -> ProfileController : PUT /api/customer/profile
+ProfileController -> ProfileService : updateProfile(username,request)
+ProfileService -> UserRepo : findByUsername(username)
+opt Doi mat khau
+  ProfileService -> PasswordEncoder : matches(currentPassword, oldHash)
+  ProfileService -> PasswordEncoder : encode(newPassword)
+end
+ProfileService -> UserRepo : save(User)
+ProfileService --> ProfileController : ProfileResponse moi
+ProfileController --> ProfilePage : 200 + thong bao cap nhat thanh cong
+
+alt Email trung / currentPassword sai / du lieu khong hop le
+  ProfileService --> ProfileController : IllegalArgumentException
+  ProfileController --> ProfilePage : 400 + thong bao loi
+  ProfilePage --> Customer : Hien thi loi
+else Loi CSDL
+  UserRepo --> ProfileService : DataAccessException
+  ProfileController --> ProfilePage : 500 Loi he thong
+  ProfilePage --> Customer : Hien thi Loi he thong
+end
+@enduml

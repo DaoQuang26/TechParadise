@@ -1,0 +1,36 @@
+@startuml UC01_sequence
+title UC01 - Dang ky tai khoan
+actor "Khach hang" as Customer
+boundary "RegisterPage" as RegisterPage
+control "AuthController" as AuthController
+control "AuthService" as AuthService
+control "PasswordEncoder" as PasswordEncoder
+database "UserRepository / users" as UserRepo
+
+Customer -> RegisterPage : Mo form Dang ky
+Customer -> RegisterPage : Nhap fullName, username, email,\nphone, address, password, confirmPassword
+Customer -> RegisterPage : Bam nut Dang ky
+RegisterPage -> AuthController : POST /api/auth/register
+AuthController -> AuthService : register(RegisterRequest)
+AuthService -> UserRepo : existsByUsernameIgnoreCase(username)
+UserRepo --> AuthService : true/false
+AuthService -> UserRepo : existsByEmailIgnoreCase(email)
+UserRepo --> AuthService : true/false
+alt Du lieu hop le
+  AuthService -> PasswordEncoder : encode(password)
+  PasswordEncoder --> AuthService : passwordHash
+  AuthService -> UserRepo : save(User role=CUSTOMER)
+  UserRepo --> AuthService : User
+  AuthService --> AuthController : User
+  AuthController --> RegisterPage : 201 Created
+  RegisterPage --> Customer : Thong bao dang ky thanh cong
+else Loi du lieu / username-email trung
+  AuthService --> AuthController : IllegalArgumentException
+  AuthController --> RegisterPage : 400 + message loi
+  RegisterPage --> Customer : Hien thi loi
+else Loi CSDL
+  UserRepo --> AuthService : DataAccessException
+  AuthController --> RegisterPage : 500 Loi he thong
+  RegisterPage --> Customer : Hien thi Loi he thong
+end
+@enduml

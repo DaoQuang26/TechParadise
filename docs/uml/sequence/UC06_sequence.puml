@@ -1,0 +1,53 @@
+@startuml UC06_sequence
+title UC06 - Xem chi tiet san pham
+actor "Khach hang" as Customer
+boundary "ProductDetailPage" as ProductDetailPage
+control "ProductController" as ProductController
+control "ProductService" as ProductService
+control "ProductVariantService" as ProductVariantService
+control "ProductReviewService" as ProductReviewService
+database "ProductRepository / products" as ProductRepo
+database "ProductVariantRepository /\nproduct_variants" as VariantRepo
+database "ProductReviewRepository /\nproduct_reviews" as ReviewRepo
+
+Customer -> ProductDetailPage : Bam vao 1 san pham
+ProductDetailPage -> ProductController : GET /api/public/products/{id}
+ProductController -> ProductService : getProductById(id)
+ProductService -> ProductRepo : findById(id)
+alt San pham ton tai
+  ProductRepo --> ProductService : Product
+  ProductService --> ProductController : Product
+  ProductController --> ProductDetailPage : Thong tin co ban
+
+  ProductDetailPage -> ProductController : GET /api/public/products/{id}/variants
+  ProductController -> ProductVariantService : getByProductId(id)
+  ProductVariantService -> VariantRepo : findByProductIdOrderBySortOrderAscIdAsc()
+  VariantRepo --> ProductVariantService : List<ProductVariant>
+  ProductVariantService --> ProductController : VariantResponseList
+  ProductController --> ProductDetailPage : Danh sach bien the
+
+  ProductDetailPage -> ProductController : GET /api/public/products/{id}/reviews
+  ProductController -> ProductReviewService : getPublicReviews(id,currentUser)
+  ProductReviewService -> ReviewRepo : findByProductIdOrderByCreatedAtDesc(id)
+  ReviewRepo --> ProductReviewService : List<ProductReview>
+  ProductReviewService --> ProductController : ProductReviewResponseList
+  ProductController --> ProductDetailPage : Danh sach review
+
+  ProductDetailPage -> ProductController : GET /api/public/products/{id}/review-summary
+  ProductController -> ProductReviewService : getReviewSummary(id,currentUser)
+  ProductReviewService -> ReviewRepo : count/average/by-star
+  ReviewRepo --> ProductReviewService : Summary data
+  ProductReviewService --> ProductController : ProductReviewSummaryResponse
+  ProductController --> ProductDetailPage : Tong quan danh gia
+  ProductDetailPage --> Customer : Hien thi trang chi tiet day du
+else San pham khong ton tai
+  ProductRepo --> ProductService : empty
+  ProductService --> ProductController : IllegalArgumentException
+  ProductController --> ProductDetailPage : 400/404 + thong bao loi
+  ProductDetailPage --> Customer : "Khong tim thay san pham"
+else Loi CSDL
+  ProductRepo --> ProductService : DataAccessException
+  ProductController --> ProductDetailPage : 500 Loi he thong
+  ProductDetailPage --> Customer : Hien thi Loi he thong
+end
+@enduml

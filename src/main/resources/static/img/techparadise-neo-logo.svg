@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="TechParadise Neo Logo">
+  <defs>
+    <linearGradient id="neoBg" x1="10" y1="8" x2="84" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff6a00"/>
+      <stop offset="0.38" stop-color="#ff2d20"/>
+      <stop offset="0.7" stop-color="#d10036"/>
+      <stop offset="1" stop-color="#6c00ff"/>
+    </linearGradient>
+    <radialGradient id="neoGlow" cx="28" cy="18" r="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="boltFill" x1="30" y1="20" x2="66" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff7c2"/>
+      <stop offset="0.45" stop-color="#ffd24a"/>
+      <stop offset="1" stop-color="#ff9a00"/>
+    </linearGradient>
+    <filter id="neoShadow" x="-16" y="-16" width="128" height="128" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="5" stdDeviation="4.6" flood-color="#ff3b30" flood-opacity="0.5"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="2.2" flood-color="#ffd54a" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <rect x="4" y="4" width="88" height="88" rx="24" fill="url(#neoBg)"/>
+  <rect x="8" y="8" width="80" height="80" rx="20" fill="url(#neoGlow)"/>
+  <rect x="14" y="14" width="68" height="68" rx="18" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.6"/>
+
+  <circle cx="48" cy="48" r="28" fill="rgba(8, 12, 34, 0.22)" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/>
+
+  <g stroke="rgba(255,255,255,0.35)" stroke-width="2" stroke-linecap="round">
+    <path d="M24 35h8"/>
+    <path d="M24 48h9"/>
+    <path d="M24 61h8"/>
+    <path d="M72 35h-8"/>
+    <path d="M72 48h-9"/>
+    <path d="M72 61h-8"/>
+  </g>
+
+  <g filter="url(#neoShadow)">
+    <path d="M53 18L31 50h15l-4 28 24-35H52z" fill="url(#boltFill)"/>
+    <path d="M53 18L31 50h15l-4 28 24-35H52z" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+  </g>
+
+  <circle cx="22" cy="22" r="2.4" fill="#fff8d6"/>
+  <circle cx="74" cy="74" r="2.4" fill="#ffd857"/>
+</svg>

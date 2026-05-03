@@ -1,0 +1,57 @@
+@startuml UC03_analysis
+title UC03 - Quen va dat lai mat khau - Analysis Class
+skinparam classAttributeIconSize 0
+
+class ForgotResetPage <<boundary>> {
+  +identifier
+  +token
+  +newPassword
+  +clickGuiToken()
+  +clickDatLai()
+}
+class AuthController <<control>> {
+  +forgotPassword(request)
+  +verifyResetToken(request)
+  +resetPassword(request)
+}
+class PasswordResetService <<control>> {
+  +forgotPassword(identifier)
+  +verifyResetToken(token)
+  +resetPassword(token,newPassword)
+}
+class EmailNotificationService <<control>> {
+  +sendPasswordResetToken(user,token)
+}
+class PasswordEncoder <<control>> {
+  +encode(newPassword)
+}
+class UserRepository <<control>> {
+  +findByUsernameIgnoreCase()
+  +findByEmailIgnoreCase()
+  +save(user)
+}
+class PasswordResetTokenRepository <<control>> {
+  +save(token)
+  +findByTokenHash()
+  +findByUserIdAndUsedAtIsNull()
+}
+class User <<entity>>
+class PasswordResetToken <<entity>> {
+  +tokenHash
+  +expiresAt
+  +usedAt
+}
+class "users (table)" as UsersTable <<entity>>
+class "password_reset_tokens (table)" as TokenTable <<entity>>
+
+ForgotResetPage --> AuthController
+AuthController --> PasswordResetService
+PasswordResetService --> EmailNotificationService
+PasswordResetService --> PasswordEncoder
+PasswordResetService --> UserRepository
+PasswordResetService --> PasswordResetTokenRepository
+PasswordResetTokenRepository --> PasswordResetToken
+UserRepository --> User
+User .. UsersTable : ORM map
+PasswordResetToken .. TokenTable : ORM map
+@enduml

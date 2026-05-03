@@ -1,0 +1,44 @@
+@startuml UC02_analysis
+title UC02 - Dang nhap - Analysis Class
+skinparam classAttributeIconSize 0
+
+class LoginPage <<boundary>> {
+  +identifier
+  +password
+  +clickDangNhap()
+}
+class AuthController <<control>> {
+  +login(request)
+}
+class AuthService <<control>> {
+  +login(request)
+}
+class AuthenticationManager <<control>> {
+  +authenticate(identifier,password)
+}
+class JwtService <<control>> {
+  +generateToken(userDetails)
+}
+class UserRepository <<control>> {
+  +findByUsernameIgnoreCase()
+  +findByEmailIgnoreCase()
+  +save(user)
+}
+class User <<entity>> {
+  +id
+  +username
+  +password
+  +role
+  +failedLoginAttempts
+  +lockoutUntil
+}
+class "users (table)" as UsersTable <<entity>>
+
+LoginPage --> AuthController
+AuthController --> AuthService
+AuthService --> AuthenticationManager
+AuthService --> JwtService
+AuthService --> UserRepository
+UserRepository --> User
+User .. UsersTable : ORM map
+@enduml

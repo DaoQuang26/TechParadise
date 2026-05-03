@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đơn hàng - Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css(v='20260412b')}" href="/css/main.css?v=20260412b">
+</head>
+<body class="admin-page">
+<div class="admin-shell">
+    <nav class="admin-nav">
+        <div class="container admin-nav-inner">
+            <div class="admin-brand">
+                <span class="logo-mark">TP</span>
+                <div>
+                    <div class="admin-brand-name">TechParadise</div>
+                    <div class="admin-brand-sub">Admin Console</div>
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <div class="admin-user-pill" title="Tài khoản đang đăng nhập">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>
+                    </span>
+                    <span id="admin-user"></span>
+                </div>
+                <span id="admin-role" class="muted"></span>
+                <a class="btn btn-dark" href="/admin/dashboard#orders">Danh sách đơn</a>
+                <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 22px 0 30px;">
+        <div class="view-head">
+            <h2 id="admin-order-title">Chi tiết đơn hàng</h2>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px;">
+            <a class="btn btn-outline" href="/admin/dashboard#orders">← Quay lại danh sách đơn</a>
+            <a id="admin-open-dashboard-order" class="btn btn-dark" href="/admin/dashboard#orders">Mở dashboard</a>
+        </div>
+
+        <section id="admin-order-detail-holder">
+            <!-- Render bằng JS -->
+        </section>
+    </main>
+</div>
+
+<script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script th:src="@{/js/admin_order_detail.js(v='20260419b')}" src="/js/admin_order_detail.js?v=20260419b"></script>
+</body>
+</html>

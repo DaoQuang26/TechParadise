@@ -1,0 +1,77 @@
+@startuml UC08_sequence
+title UC08 - Dat hang va thanh toan
+actor "Khach hang" as Customer
+participant "Cong thanh toan\n(MOCK/VNPAY/MOMO)" as PaymentGateway
+boundary "CheckoutPage" as CheckoutPage
+control "CustomerOrderController" as CustomerOrderController
+control "OrderService" as OrderService
+control "PromotionService" as PromotionService
+control "CustomerPaymentController" as CustomerPaymentController
+control "PaymentService" as PaymentService
+control "OrderStatusHistoryService" as OrderStatusHistoryService
+control "EmailNotificationService" as EmailNotificationService
+database "UserRepository / users" as UserRepo
+database "ProductRepository / products" as ProductRepo
+database "ProductVariantRepository /\nproduct_variants" as VariantRepo
+database "PromotionRepository / promotions" as PromotionRepo
+database "OrderRepository / orders + order_items" as OrderRepo
+
+Customer -> CheckoutPage : Bam "Thanh toan" tu gio hoac "Mua ngay"
+CheckoutPage --> Customer : Hien thi form recipientName,\nrecipientPhone, shippingAddress,\npaymentMethod, promotionCode
+Customer -> CheckoutPage : Nhap thong tin va bam "Xac nhan dat hang"
+CheckoutPage -> CustomerOrderController : POST /api/customer/orders
+CustomerOrderController -> OrderService : createOrderSummary(username,request)
+OrderService -> UserRepo : findByUsername(username)
+loop Moi dong san pham trong gio
+  OrderService -> ProductRepo : findById(productId)
+  OrderService -> VariantRepo : findByProductIdOrderBySortOrderAscIdAsc()
+  OrderService -> OrderService : Kiem tra ton kho + tinh don gia
+  OrderService -> ProductRepo : cap nhat stock
+  OrderService -> VariantRepo : cap nhat stock bien the
+end
+opt Co ma khuyen mai
+  OrderService -> PromotionService : findValidPromotionOrThrow(code)
+  PromotionService -> PromotionRepo : findByCodeIgnoreCase(code)
+  PromotionRepo --> PromotionService : Promotion
+  PromotionService --> OrderService : Promotion hop le
+end
+OrderService -> OrderRepo : saveAndFlush(order + orderItems)
+OrderService -> OrderStatusHistoryService : saveHistorySafe(PENDING->PENDING)
+OrderService -> EmailNotificationService : sendOrderCreated(order)
+OrderService --> CustomerOrderController : OrderSummaryResponse
+CustomerOrderController --> CheckoutPage : 201 Created + orderId
+
+alt Khach chon ONLINE_GATEWAY
+  Customer -> CheckoutPage : Bam nut "Thanh toan online"
+  CheckoutPage -> CustomerPaymentController : POST /api/customer/payments/session
+  CustomerPaymentController -> PaymentService : createSession(username,orderId,provider,clientIp)
+  PaymentService -> OrderRepo : findById/order cua user
+  PaymentService -> OrderRepo : save(paymentReference,\npaymentProvider, onlinePaymentStatus=PENDING)
+  PaymentService --> CustomerPaymentController : CreatePaymentSessionResponse(checkoutUrl)
+  CustomerPaymentController --> CheckoutPage : checkoutUrl
+  CheckoutPage -> PaymentGateway : Redirect checkoutUrl
+  PaymentGateway -> PaymentService : Callback return/ipn/webhook
+  alt Thanh toan thanh cong
+    PaymentService -> OrderRepo : update onlinePaymentStatus=PAID,\npaidAt, paymentProvider
+    PaymentService -> OrderStatusHistoryService : saveHistorySafe(...)
+    PaymentService -> EmailNotificationService : sendOrderPaymentResult(PAID)
+  else Thanh toan that bai/het han
+    PaymentService -> OrderRepo : update onlinePaymentStatus=FAILED\nhoac cancel order neu qua han
+    PaymentService -> OrderStatusHistoryService : saveHistorySafe(...)
+    PaymentService -> EmailNotificationService : sendOrderPaymentResult(FAILED)
+  end
+  PaymentService --> CheckoutPage : Redirect /payments/result
+else Khach chon COD
+  CheckoutPage --> Customer : Dat hang thanh cong,\ncho xac nhan don hang
+end
+
+alt Thieu thong tin / gio rong / het ton kho /\npromo khong hop le
+  OrderService --> CustomerOrderController : IllegalArgumentException
+  CustomerOrderController --> CheckoutPage : 400 + thong bao loi
+  CheckoutPage --> Customer : Hien thi loi
+else Loi CSDL
+  OrderRepo --> OrderService : DataAccessException
+  CustomerOrderController --> CheckoutPage : 500 Loi he thong
+  CheckoutPage --> Customer : Hien thi Loi he thong
+end
+@enduml

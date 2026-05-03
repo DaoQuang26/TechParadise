@@ -1,0 +1,49 @@
+@startuml UC18_sequence
+title UC18 - Admin phan hoi ho tro
+actor "Admin" as Admin
+boundary "AdminSupportInboxPage" as AdminSupportInboxPage
+control "AdminSupportMessageController" as AdminSupportMessageController
+control "SupportMessageService" as SupportMessageService
+database "UserRepository / users" as UserRepo
+database "SupportMessageRepository /\nsupport_messages" as SupportRepo
+
+Admin -> AdminSupportInboxPage : Mo trang Ho tro khach hang
+AdminSupportInboxPage -> AdminSupportMessageController : GET /api/admin/messages/conversations
+AdminSupportMessageController -> SupportMessageService : getAdminConversations(adminUsername)
+SupportMessageService -> UserRepo : findByUsernameIgnoreCase(adminUsername)
+SupportMessageService -> SupportRepo : findLatestByCustomerConversation()
+SupportMessageService --> AdminSupportMessageController : ConversationSummary[]
+AdminSupportMessageController --> AdminSupportInboxPage : Danh sach hoi thoai
+
+Admin -> AdminSupportInboxPage : Chon 1 hoi thoai theo customer
+AdminSupportInboxPage -> AdminSupportMessageController : GET /api/admin/messages/conversations/{customerId}?markRead=true
+AdminSupportMessageController -> SupportMessageService : getAdminConversation(adminUsername,customerId,markRead)
+SupportMessageService -> UserRepo : findByUsernameIgnoreCase(adminUsername)
+SupportMessageService -> UserRepo : findById(customerId)
+SupportMessageService -> SupportRepo : markCustomerMessagesReadByAdmin(customerId)
+SupportMessageService -> SupportRepo : findByCustomerIdOrderByCreatedAtAscIdAsc()
+SupportMessageService --> AdminSupportMessageController : SupportConversationResponse
+AdminSupportMessageController --> AdminSupportInboxPage : Hien thi lich su chat
+
+Admin -> AdminSupportInboxPage : Nhap noi dung phan hoi
+Admin -> AdminSupportInboxPage : Bam nut Gui
+AdminSupportInboxPage -> AdminSupportMessageController : POST /api/admin/messages/conversations/{customerId}/reply
+AdminSupportMessageController -> SupportMessageService : sendAdminReply(adminUsername,customerId,content)
+SupportMessageService -> UserRepo : findByUsernameIgnoreCase(adminUsername)
+SupportMessageService -> UserRepo : findById(customerId)
+SupportMessageService -> SupportRepo : save(SupportMessage senderRole=ADMIN/SUPER_ADMIN)
+SupportRepo --> SupportMessageService : SupportMessage
+SupportMessageService --> AdminSupportMessageController : SupportMessageResponse
+AdminSupportMessageController --> AdminSupportInboxPage : 201 Created + tin nhan moi
+AdminSupportInboxPage --> Admin : Hien thi tin phan hoi
+
+alt Khong du quyen / customer khong ton tai /\nnoi dung rong hoac qua dai
+  SupportMessageService --> AdminSupportMessageController : IllegalArgumentException
+  AdminSupportMessageController --> AdminSupportInboxPage : 400 + thong bao loi
+  AdminSupportInboxPage --> Admin : Hien thi loi
+else Loi CSDL
+  SupportRepo --> SupportMessageService : DataAccessException
+  AdminSupportMessageController --> AdminSupportInboxPage : 500 Loi he thong
+  AdminSupportInboxPage --> Admin : Hien thi Loi he thong
+end
+@enduml

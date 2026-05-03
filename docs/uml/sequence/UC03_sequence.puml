@@ -1,0 +1,51 @@
+@startuml UC03_sequence
+title UC03 - Quen va dat lai mat khau
+actor "Nguoi dung" as User
+boundary "ForgotResetPage" as ForgotResetPage
+control "AuthController" as AuthController
+control "PasswordResetService" as PasswordResetService
+control "EmailNotificationService" as EmailService
+control "PasswordEncoder" as PasswordEncoder
+database "UserRepository / users" as UserRepo
+database "PasswordResetTokenRepository /\npassword_reset_tokens" as TokenRepo
+
+User -> ForgotResetPage : Nhap email/username
+User -> ForgotResetPage : Bam nut Gui ma reset
+ForgotResetPage -> AuthController : POST /api/auth/forgot-password
+AuthController -> PasswordResetService : forgotPassword(identifier)
+PasswordResetService -> UserRepo : findByUsernameIgnoreCase()\nor findByEmailIgnoreCase()
+UserRepo --> PasswordResetService : User/null
+alt Tai khoan ton tai
+  PasswordResetService -> TokenRepo : save(tokenHash, expiresAt, usedAt=null)
+  PasswordResetService -> EmailService : sendPasswordResetToken(user, rawToken)
+  PasswordResetService --> AuthController : ForgotPasswordResponse
+  AuthController --> ForgotResetPage : 200 + thong bao tao token
+else Tai khoan khong ton tai
+  PasswordResetService --> AuthController : Generic response (an toan)
+  AuthController --> ForgotResetPage : 200 + thong bao chung
+else Loi CSDL
+  TokenRepo --> PasswordResetService : DataAccessException
+  AuthController --> ForgotResetPage : 500 Loi he thong
+end
+
+User -> ForgotResetPage : Nhap token + mat khau moi
+User -> ForgotResetPage : Bam nut Dat lai mat khau
+ForgotResetPage -> AuthController : POST /api/auth/reset-password
+AuthController -> PasswordResetService : resetPassword(token,newPassword)
+PasswordResetService -> TokenRepo : findByTokenHash()
+alt Token hop le va chua dung
+  PasswordResetService -> PasswordEncoder : encode(newPassword)
+  PasswordEncoder --> PasswordResetService : passwordHash
+  PasswordResetService -> UserRepo : save(user.password)
+  PasswordResetService -> TokenRepo : findByUserIdAndUsedAtIsNull()
+  PasswordResetService -> TokenRepo : mark usedAt cho token
+  PasswordResetService --> AuthController : MessageResponse success
+  AuthController --> ForgotResetPage : 200 Dat lai thanh cong
+else Token sai/het han/da dung or password moi khong hop le
+  PasswordResetService --> AuthController : IllegalArgumentException
+  AuthController --> ForgotResetPage : 400 + thong bao loi
+else Loi CSDL
+  TokenRepo --> PasswordResetService : DataAccessException
+  AuthController --> ForgotResetPage : 500 Loi he thong
+end
+@enduml

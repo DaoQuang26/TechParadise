@@ -1,0 +1,47 @@
+@startuml UC17_sequence
+title UC17 - Khach hang nhan tin ho tro
+actor "Khach hang" as Customer
+boundary "SupportChatPage" as SupportChatPage
+control "CustomerSupportMessageController" as CustomerSupportMessageController
+control "SupportMessageService" as SupportMessageService
+database "UserRepository / users" as UserRepo
+database "SupportMessageRepository /\nsupport_messages" as SupportRepo
+
+Customer -> SupportChatPage : Mo trang Ho tro
+SupportChatPage -> CustomerSupportMessageController : GET /api/customer/messages/summary
+CustomerSupportMessageController -> SupportMessageService : getCustomerInboxSummary(username)
+SupportMessageService -> UserRepo : findByUsernameIgnoreCase()
+SupportMessageService -> SupportRepo : countUnreadForCustomer(customerId)
+SupportMessageService -> SupportRepo : findTopByCustomerIdOrderByCreatedAtDescIdDesc()
+SupportMessageService --> CustomerSupportMessageController : SupportInboxSummaryResponse
+CustomerSupportMessageController --> SupportChatPage : Hien thi so tin chua doc
+
+SupportChatPage -> CustomerSupportMessageController : GET /api/customer/messages?markRead=true
+CustomerSupportMessageController -> SupportMessageService : getCustomerConversation(username,markRead)
+SupportMessageService -> UserRepo : findByUsernameIgnoreCase()
+SupportMessageService -> SupportRepo : markAdminMessagesReadByCustomer(customerId)
+SupportMessageService -> SupportRepo : findByCustomerIdOrderByCreatedAtAscIdAsc()
+SupportMessageService --> CustomerSupportMessageController : SupportConversationResponse
+CustomerSupportMessageController --> SupportChatPage : Hien thi lich su hoi thoai
+
+Customer -> SupportChatPage : Nhap noi dung tin nhan
+Customer -> SupportChatPage : Bam nut Gui
+SupportChatPage -> CustomerSupportMessageController : POST /api/customer/messages
+CustomerSupportMessageController -> SupportMessageService : sendCustomerMessage(username,content)
+SupportMessageService -> UserRepo : findByUsernameIgnoreCase()
+SupportMessageService -> SupportRepo : save(SupportMessage senderRole=CUSTOMER)
+SupportRepo --> SupportMessageService : SupportMessage
+SupportMessageService --> CustomerSupportMessageController : SupportMessageResponse
+CustomerSupportMessageController --> SupportChatPage : 201 Created + message moi
+SupportChatPage --> Customer : Hien thi tin nhan vua gui
+
+alt Chua dang nhap / noi dung rong / qua dai
+  SupportMessageService --> CustomerSupportMessageController : IllegalArgumentException
+  CustomerSupportMessageController --> SupportChatPage : 400 + thong bao loi
+  SupportChatPage --> Customer : Hien thi loi
+else Loi CSDL
+  SupportRepo --> SupportMessageService : DataAccessException
+  CustomerSupportMessageController --> SupportChatPage : 500 Loi he thong
+  SupportChatPage --> Customer : Hien thi Loi he thong
+end
+@enduml

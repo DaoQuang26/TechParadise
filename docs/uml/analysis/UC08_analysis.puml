@@ -1,0 +1,71 @@
+@startuml UC08_analysis
+title UC08 - Dat hang va thanh toan - Analysis Class
+skinparam classAttributeIconSize 0
+
+class CheckoutPage <<boundary>> {
+  +recipientName
+  +recipientPhone
+  +shippingAddress
+  +paymentMethod
+  +promotionCode
+  +items[]
+  +clickConfirmOrder()
+  +clickPayOnline()
+}
+class CustomerOrderController <<control>> {
+  +createOrder(request)
+}
+class OrderService <<control>> {
+  +createOrderSummary(username,request)
+  +createOrder(username,request)
+}
+class PromotionService <<control>> {
+  +findValidPromotionOrThrow(code)
+}
+class CustomerPaymentController <<control>> {
+  +createSession(request)
+}
+class PaymentService <<control>> {
+  +createSession(username,orderId,provider,ip)
+  +handleWebhookOrReturn(...)
+}
+class OrderStatusHistoryService <<control>> {
+  +saveHistorySafe(...)
+}
+class UserRepository <<control>>
+class ProductRepository <<control>>
+class ProductVariantRepository <<control>>
+class PromotionRepository <<control>>
+class OrderRepository <<control>>
+class Order <<entity>>
+class OrderItem <<entity>>
+class Product <<entity>>
+class ProductVariant <<entity>>
+class Promotion <<entity>>
+class OrderStatusHistory <<entity>>
+class "orders (table)" as OrdersTable <<entity>>
+class "order_items (table)" as OrderItemsTable <<entity>>
+class "order_status_history (table)" as HistoryTable <<entity>>
+
+CheckoutPage --> CustomerOrderController
+CheckoutPage --> CustomerPaymentController
+CustomerOrderController --> OrderService
+OrderService --> PromotionService
+OrderService --> OrderStatusHistoryService
+OrderService --> UserRepository
+OrderService --> ProductRepository
+OrderService --> ProductVariantRepository
+OrderService --> OrderRepository
+PromotionService --> PromotionRepository
+CustomerPaymentController --> PaymentService
+PaymentService --> OrderRepository
+OrderRepository --> Order
+OrderRepository --> OrderItem
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+PromotionRepository --> Promotion
+OrderStatusHistoryService --> OrderStatusHistory
+Order .. OrdersTable : ORM map
+OrderItem .. OrderItemsTable : ORM map
+OrderStatusHistory .. HistoryTable : ORM map
+@enduml

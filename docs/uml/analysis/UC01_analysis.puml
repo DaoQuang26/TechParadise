@@ -1,0 +1,47 @@
+@startuml UC01_analysis
+title UC01 - Dang ky tai khoan - Analysis Class
+skinparam classAttributeIconSize 0
+
+class RegisterPage <<boundary>> {
+  +fullName
+  +username
+  +email
+  +phone
+  +address
+  +password
+  +confirmPassword
+  +clickDangKy()
+}
+class AuthController <<control>> {
+  +register(request)
+}
+class AuthService <<control>> {
+  +register(request)
+}
+class PasswordEncoder <<control>> {
+  +encode(rawPassword)
+}
+class UserRepository <<control>> {
+  +existsByUsernameIgnoreCase()
+  +existsByEmailIgnoreCase()
+  +save(user)
+}
+class User <<entity>> {
+  +id
+  +username
+  +fullName
+  +email
+  +password
+  +phone
+  +address
+  +role
+}
+class "users (table)" as UsersTable <<entity>>
+
+RegisterPage --> AuthController
+AuthController --> AuthService
+AuthService --> PasswordEncoder
+AuthService --> UserRepository
+UserRepository --> User
+User .. UsersTable : ORM map
+@enduml

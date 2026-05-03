@@ -1,0 +1,28 @@
+@startuml UC05_sequence
+title UC05 - Tim kiem san pham
+actor "Khach hang" as Customer
+boundary "SearchBar" as SearchBar
+control "ProductController" as ProductController
+control "ProductService" as ProductService
+database "ProductRepository / products" as ProductRepo
+
+Customer -> SearchBar : Nhap tu khoa vao o tim kiem
+Customer -> SearchBar : Bam nut Tim kiem
+SearchBar -> ProductController : GET /api/public/products?keyword=...
+ProductController -> ProductService : getPublicProducts(keyword, categoryId?)
+ProductService -> ProductRepo : findByNameContainingIgnoreCase()\nhoac searchPublicProducts()
+ProductRepo --> ProductService : List<Product>
+alt Tim thay ket qua
+  ProductService --> ProductController : Danh sach san pham
+  ProductController --> SearchBar : 200 + List<Product>
+  SearchBar --> Customer : Hien thi danh sach ket qua
+else Khong tim thay
+  ProductService --> ProductController : []
+  ProductController --> SearchBar : Danh sach rong
+  SearchBar --> Customer : "Khong tim thay san pham"
+else Loi CSDL
+  ProductRepo --> ProductService : DataAccessException
+  ProductController --> SearchBar : 500 Loi he thong
+  SearchBar --> Customer : Hien thi Loi he thong
+end
+@enduml

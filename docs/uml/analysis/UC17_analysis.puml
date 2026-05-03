@@ -1,0 +1,43 @@
+@startuml UC17_analysis
+title UC17 - Khach hang nhan tin ho tro - Analysis Class
+skinparam classAttributeIconSize 0
+
+class SupportChatPage <<boundary>> {
+  +messageInput
+  +clickLoadSummary()
+  +clickLoadConversation()
+  +clickSendMessage()
+}
+class CustomerSupportMessageController <<control>> {
+  +getInboxSummary()
+  +getConversation(markRead)
+  +sendMessage(request)
+}
+class SupportMessageService <<control>> {
+  +getCustomerInboxSummary(username)
+  +getCustomerConversation(username,markRead)
+  +sendCustomerMessage(username,content)
+}
+class UserRepository <<control>>
+class SupportMessageRepository <<control>>
+class User <<entity>>
+class SupportMessage <<entity>> {
+  +customerId
+  +senderUserId
+  +senderRole
+  +content
+  +readByAdmin
+  +readByCustomer
+}
+class "users (table)" as UsersTable <<entity>>
+class "support_messages (table)" as SupportTable <<entity>>
+
+SupportChatPage --> CustomerSupportMessageController
+CustomerSupportMessageController --> SupportMessageService
+SupportMessageService --> UserRepository
+SupportMessageService --> SupportMessageRepository
+UserRepository --> User
+SupportMessageRepository --> SupportMessage
+User .. UsersTable : ORM map
+SupportMessage .. SupportTable : ORM map
+@enduml

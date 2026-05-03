@@ -1,0 +1,58 @@
+@startuml UC07_analysis
+title UC07 - Quan ly gio hang - Analysis Class
+skinparam classAttributeIconSize 0
+
+class CartPage <<boundary>> {
+  +productId
+  +variantId
+  +quantity
+  +clickAddToCart()
+  +clickUpdateQuantity()
+  +clickRemoveItem()
+  +clickClearCart()
+}
+class CustomerCartController <<control>> {
+  +myCart()
+  +addItem()
+  +updateItemQuantity()
+  +removeItem()
+  +clear()
+}
+class CartService <<control>> {
+  +getCart(username)
+  +addItem(username,request)
+  +setItemQuantity(username,productId,variantId,request)
+  +removeItem(username,productId,variantId)
+  +clearCart(username)
+}
+class ProductPricingService <<control>> {
+  +calculateDiscountedPrice()
+}
+class UserRepository <<control>>
+class ProductRepository <<control>>
+class ProductVariantRepository <<control>>
+class CartItemRepository <<control>>
+class User <<entity>>
+class Product <<entity>>
+class ProductVariant <<entity>>
+class CartItem <<entity>> {
+  +userId
+  +productId
+  +productVariantId
+  +quantity
+}
+class "cart_items (table)" as CartTable <<entity>>
+
+CartPage --> CustomerCartController
+CustomerCartController --> CartService
+CartService --> ProductPricingService
+CartService --> UserRepository
+CartService --> ProductRepository
+CartService --> ProductVariantRepository
+CartService --> CartItemRepository
+UserRepository --> User
+ProductRepository --> Product
+ProductVariantRepository --> ProductVariant
+CartItemRepository --> CartItem
+CartItem .. CartTable : ORM map
+@enduml

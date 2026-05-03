@@ -1,0 +1,75 @@
+@startuml UC12_sequence
+title UC12 - Quan ly san pham (Admin)
+actor "Admin" as Admin
+boundary "AdminProductPage" as AdminProductPage
+control "AdminProductController" as AdminProductController
+control "ProductService" as ProductService
+control "ProductVariantService" as ProductVariantService
+control "AdminAuditLogService" as AuditService
+database "ProductRepository / products" as ProductRepo
+database "CategoryRepository / categories" as CategoryRepo
+database "ProductVariantRepository /\nproduct_variants" as VariantRepo
+database "OrderItemRepository / order_items" as OrderItemRepo
+database "CartItemRepository / cart_items" as CartItemRepo
+database "ProductReviewRepository /\nproduct_reviews" as ReviewRepo
+database "AdminAuditLogRepository /\nadmin_audit_logs" as AuditRepo
+
+Admin -> AdminProductPage : Mo trang Quan ly san pham
+AdminProductPage -> AdminProductController : GET /api/admin/products/paged
+AdminProductController -> ProductService : getAdminProductsPaged(...)
+ProductService -> ProductRepo : searchPublicProducts(...)
+ProductRepo --> ProductService : Page<Product>
+ProductService --> AdminProductController : Page<Product>
+AdminProductController --> AdminProductPage : Hien thi danh sach san pham
+
+alt Bam nut Them san pham
+  Admin -> AdminProductPage : Nhap form + Bam Luu
+  AdminProductPage -> AdminProductController : POST /api/admin/products
+  AdminProductController -> ProductService : createProduct(product)
+  ProductService -> CategoryRepo : findById(categoryId)
+  ProductService -> ProductRepo : save(product)
+  AdminProductController -> AuditService : logAction(PRODUCT_CREATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  AdminProductController --> AdminProductPage : 201 Created
+else Bam nut Sua san pham
+  Admin -> AdminProductPage : Sua form + Bam Cap nhat
+  AdminProductPage -> AdminProductController : PUT /api/admin/products/{id}
+  AdminProductController -> ProductService : updateProduct(id,product)
+  ProductService -> ProductRepo : findById(id)
+  ProductService -> CategoryRepo : findById(categoryId)
+  ProductService -> ProductRepo : save(product)
+  AdminProductController -> AuditService : logAction(PRODUCT_UPDATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  AdminProductController --> AdminProductPage : 200 Updated
+else Bam nut Quan ly bien the
+  Admin -> AdminProductPage : Chinh bien the + Bam Luu
+  AdminProductPage -> AdminProductController : PUT /api/admin/products/{id}/variants
+  AdminProductController -> ProductVariantService : replaceProductVariants(id,requests)
+  ProductVariantService -> VariantRepo : save/delete variants
+  AdminProductController -> AuditService : logAction(PRODUCT_VARIANT_UPDATE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  AdminProductController --> AdminProductPage : Danh sach bien the moi
+else Bam nut Xoa san pham
+  Admin -> AdminProductPage : Bam Xoa
+  AdminProductPage -> AdminProductController : DELETE /api/admin/products/{id}
+  AdminProductController -> ProductService : deleteProduct(id)
+  ProductService -> OrderItemRepo : countByProductId(id)
+  ProductService -> CartItemRepo : deleteByProductId(id)
+  ProductService -> VariantRepo : deleteByProductId(id)
+  ProductService -> ReviewRepo : deleteByProductId(id)
+  ProductService -> ProductRepo : deleteById(id)
+  AdminProductController -> AuditService : logAction(PRODUCT_DELETE)
+  AuditService -> AuditRepo : save(admin_audit_logs)
+  AdminProductController --> AdminProductPage : 204 No Content
+end
+
+alt Du lieu khong hop le / category khong ton tai /\nkhong the xoa vi da co order
+  ProductService --> AdminProductController : IllegalArgumentException
+  AdminProductController --> AdminProductPage : 400 + thong bao loi
+  AdminProductPage --> Admin : Hien thi loi
+else Loi CSDL
+  ProductRepo --> ProductService : DataAccessException
+  AdminProductController --> AdminProductPage : 500 Loi he thong
+  AdminProductPage --> Admin : Hien thi Loi he thong
+end
+@enduml

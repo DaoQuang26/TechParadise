@@ -1,0 +1,37 @@
+@startuml UC18_analysis
+title UC18 - Admin phan hoi ho tro - Analysis Class
+skinparam classAttributeIconSize 0
+
+class AdminSupportInboxPage <<boundary>> {
+  +conversationList
+  +replyInput
+  +clickLoadConversations()
+  +clickOpenConversation()
+  +clickSendReply()
+}
+class AdminSupportMessageController <<control>> {
+  +getConversations()
+  +getConversation(customerId,markRead)
+  +sendReply(customerId,request)
+}
+class SupportMessageService <<control>> {
+  +getAdminConversations(adminUsername)
+  +getAdminConversation(adminUsername,customerId,markRead)
+  +sendAdminReply(adminUsername,customerId,content)
+}
+class UserRepository <<control>>
+class SupportMessageRepository <<control>>
+class User <<entity>>
+class SupportMessage <<entity>>
+class "users (table)" as UsersTable <<entity>>
+class "support_messages (table)" as SupportTable <<entity>>
+
+AdminSupportInboxPage --> AdminSupportMessageController
+AdminSupportMessageController --> SupportMessageService
+SupportMessageService --> UserRepository
+SupportMessageService --> SupportMessageRepository
+UserRepository --> User
+SupportMessageRepository --> SupportMessage
+User .. UsersTable : ORM map
+SupportMessage .. SupportTable : ORM map
+@enduml
